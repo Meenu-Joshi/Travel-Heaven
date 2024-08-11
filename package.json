@@ -1,5 +1,5 @@
 { "engines": {
-  "node":"21.61"
+  "node":"21.6.1"
 },
   "name": "wanderlust",
   "version": "1.0.0",
