@@ -105,9 +105,6 @@ app.use("/listings/:id/reviews",reviewRouter);
 app.use("/",userRouter);
 
 
-app.use("*",(req,res,next)=>{
-    next(new ExpressError(404,"Page Not Found!"));
- })
 
 
 
@@ -120,7 +117,11 @@ app.use("*",(req,res,next)=>{
     res.render("listing/error.ejs",{err});
     next(err);
 });
- 
+
+// app.use("*",(req,res,next)=>{
+//     next(new ExpressError(404,"Page Not Found!"));
+//  })
+
 
 
 app.listen("8080",()=>{
