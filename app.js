@@ -118,14 +118,15 @@ app.use("/",userRouter);
     next(err);
 });
 
-// app.use("*",(req,res,next)=>{
-//     next(new ExpressError(404,"Page Not Found!"));
-//  })
+
 app.get('/', (req, res) => {
     res.send('Welcome to WanderLust!');
 });
 
 
+app.use("*",(req,res,next)=>{
+    next(new ExpressError(404,"Page Not Found!"));
+ })
 
 app.listen("8080",()=>{
     console.log("port connected");
