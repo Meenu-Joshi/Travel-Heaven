@@ -18,22 +18,37 @@ module.exports.createNewListing=async (req,res,next)=>{
     req.flash("success","New listing added");
     res.redirect("/listings");
 };
-module.exports.showListing=async (req,res)=>{
-    let {id}=req.params;
-    const listing=await Listing.findById(id)
-       .populate({path:"reviews",
-        populate:{path:"author"}
-    })
-        .populate("owner");
-    if(!listing){
-        req.flash("error","listing doesn't exist")
+// module.exports.showListing=async (req,res)=>{
+//     let {id}=req.params;
+//     const listing=await Listing.findById(id)
+//        .populate({path:"reviews",
+//         populate:{path:"author"}
+//     })
+//         .populate("owner");
+//     if(!listing){
+//         req.flash("error","listing doesn't exist")
+//         res.redirect("/listings");
+//     }
+//     //   let originalImageUrl=listing.image.url;
+//     //    originalImageUrl= originalImageUrl.replace("/upload","/upload/c_thumb/g_face/r_max");
+//     //    console.log(originalImageUrl);
+//        res.render("listing/show",{listing});
+
+// };
+module.exports.showListing = async (req, res) => {
+    let { id } = req.params;
+    const listing = await Listing.findById(id)
+        .populate({
+            path: "reviews",
+            populate: { path: "author" },
+        })
+        .populate("owner"); // This line fixes your error 
+    
+    if (!listing) {
+        req.flash("error", "Listing you requested for does not exist!");
         res.redirect("/listings");
     }
-    //   let originalImageUrl=listing.image.url;
-    //    originalImageUrl= originalImageUrl.replace("/upload","/upload/c_thumb/g_face/r_max");
-    //    console.log(originalImageUrl);
-       res.render("listing/show",{listing});
-
+    res.render("listing/show.ejs", { listing });
 };
 module.exports.renderEditForm=async (req,res)=>{
     let {id}=req.params;

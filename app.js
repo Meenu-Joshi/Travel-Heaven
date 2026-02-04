@@ -1,7 +1,8 @@
-if(process.env.Node_ENV !="production"){
+if(process.env.NODE_ENV !=="production"){
     require('dotenv').config();
 }
 console.log(process.env.SECRET);
+
 
 const express=require("express");
 const app=express();
@@ -24,8 +25,11 @@ const User=require("./models/user.js");
 
 
 
-// let Mongo_url="mongodb://127.0.0.1:27017/wanderlust";
 const dbUrl=process.env.ATLASDB_URL;
+console.log(dbUrl);
+async function main(){
+    await mongoose.connect(dbUrl);
+}
 main().then((res)=>{
     console.log("connection successfull");
 }).catch((err)=>{
@@ -46,7 +50,7 @@ store.on("error",()=>{
 })
 let sessionOptions={
     store,
-    secret:process.env.SECRET,
+    secret:process.env.CLOUD_API_SECRET,
     resave: false,
     saveUninitialized: true,
     cookie:{
@@ -57,9 +61,7 @@ let sessionOptions={
 }
 
 
-async function main(){
-    await mongoose.connect(dbUrl);
-}
+
 
 // app.get("/",(req,res)=>{
     
@@ -109,16 +111,19 @@ app.use("/",userRouter);
 
 
  
- app.use((err,req,res,next)=>{
+//  app.use((err,req,res,next)=>{
    
-    let{status=500,message="something went wrong"}=err;
-    console.log(err);
+//     let{status=500,message="something went wrong"}=err;
+//     console.log(err);
     
-    res.render("listing/error.ejs",{err});
-    next(err);
+//     res.render("listing/error.ejs",{err});
+//     next(err);
+// });
+app.use((err, req, res, next) => {
+    let { status = 500, message = "Something went wrong" } = err;
+    // Pass 'message' to the EJS file instead of the whole object
+    res.status(status).render("listing/error.ejs", { err:message }); 
 });
-
-
 app.get('/', (req, res) => {
     res.send('Welcome to WanderLust!');
 });
@@ -128,6 +133,6 @@ app.use("*",(req,res,next)=>{
     next(new ExpressError(404,"Page Not Found!"));
  })
 
-app.listen("8080",()=>{
+app.listen("3000",()=>{
     console.log("port connected");
 });
