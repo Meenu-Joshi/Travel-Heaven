@@ -113,7 +113,7 @@ app.use("/",userRouter);
  
 //  app.use((err,req,res,next)=>{
    
-//     let{status=500,message="something went wrong"}=err;
+//     let{status=50n0,message="something went wrong"}=err;
 //     console.log(err);
     
 //     res.render("listing/error.ejs",{err});

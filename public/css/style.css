@@ -1,20 +1,40 @@
-body{
+/* style.css */
+body {
     font-family: "Plus Jakarta Sans", sans-serif !important;
     display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  
+    flex-direction: column;
+    min-height: 100vh;
+    /* Push content down so it doesn't hide behind the sticky navbar */
+    
+}
+
+/* Ensure the navbar stays on the absolute top layer */
+.navbar {
+    min-height: 5rem;
+    background-color: white !important;
+    z-index: 1000 !important; 
+    width: 100%;
+}
+
+/* Position filters exactly below the navbar */
+.filters-container {
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    white-space: nowrap;
+    background-color: white; 
+    position: sticky;
+    top: 5rem; /* Matches navbar height */
+    z-index: 999; /* Sits just below navbar */
+    border-bottom: 1px solid #ebebeb;
+    padding: 0.75rem 0;
 }
 
 .container{
     flex: 1;
 }
 /* navbar */
-.navbar{
-    height: 5rem;
-    background-color: white;
-    
-}
+
 .fa-compass{
     color: #fe424d;
     font-size: 2rem;
@@ -112,3 +132,4 @@ div svg{
     height: 10%;
     width: 10%;
 }
+
