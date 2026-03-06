@@ -23,6 +23,9 @@ router.route("/:id")
 // Edit Route
 router.get("/:id/edit",isLoggedIn,isOwner,WrapAsync(listingController.renderEditForm));
 
+
+
+
 //delete route
 router.delete("/:id/delete",isOwner,isLoggedIn,WrapAsync(listingController.destroyListing));
 

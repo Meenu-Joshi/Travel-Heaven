@@ -21,6 +21,9 @@ const flash=require("connect-flash");
 const passport=require("passport");
 const LocalStrategy=require("passport-local");
 const User=require("./models/user.js");
+const bookingRouter = require("./router/booking.js");
+
+// Prefixing with /listings/:id/bookings
 
 
 
@@ -101,7 +104,7 @@ app.use((req,res,next)=>{
 });
 
 
-
+app.use("/listings/:id/bookings", bookingRouter);
 app.use("/listings",listingRouter);
 app.use("/listings/:id/reviews",reviewRouter);
 app.use("/",userRouter);

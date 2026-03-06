@@ -1,6 +1,6 @@
 
 const mongoose=require("mongoose");
-let schema=mongoose.Schema;
+const schema=mongoose.Schema;
 
 const listingSchema=new schema({
     title:{
@@ -28,7 +28,13 @@ const listingSchema=new schema({
     owner:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"User"    
-    }
+    },
+    bookings: [
+        {
+            type: mongoose.Schema.Types.ObjectId, // Now this will work!
+            ref: "Booking",
+        }
+    ],
 
 }
 )

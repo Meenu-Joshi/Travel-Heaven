@@ -1,0 +1,21 @@
+<% layout('layout/boilerplate') -%>
+<div class="row mt-3">
+    <div class="col-8 offset-2">
+        <h2>Book: <%= listing.title %></h2>
+        <form method="POST" action="/listings/<%= listing._id %>/bookings" novalidate class="needs-validation">
+            <div class="mb-3">
+                <label for="checkIn" class="form-label">Check-in Date</label>
+                <input type="date" name="booking[checkIn]" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="checkOut" class="form-label">Check-out Date</label>
+                <input type="date" name="booking[checkOut]" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="guests" class="form-label">Number of Guests</label>
+                <input type="number" name="booking[guests]" class="form-control" min="1" required>
+            </div>
+            <button class="btn btn-danger">Confirm Booking</button>
+        </form>
+    </div>
+</div>
