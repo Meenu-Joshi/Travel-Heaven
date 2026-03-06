@@ -1,0 +1,54 @@
+<% layout('layout/boilerplate') -%>
+<div class="row mt-3 mb-5 ">
+    <div class="col-md-6 offset-md-3">
+        <h2 class="text-center mb-4">Confirm Your Stay</h2>
+        
+        <div class="card booking-summary-card shadow">
+            <div class="card-header bg-dark text-white text-center">
+                <h4>Booking Invoice</h4>
+            </div>
+            <div class="card-body p-5">
+                <h5 class="card-title text-primary"><%= listing.title %></h5>
+                <p class="text-muted"><%= listing.location %>, <%= listing.country %></p>
+                <hr>
+                
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <p class="mb-0"><strong>Check-In:</strong></p>
+                        <p><%= checkIn %></p>
+                    </div>
+                    <div class="col-6">
+                        <p class="mb-0"><strong>Check-Out:</strong></p>
+                        <p><%= checkOut %></p>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>Price per night:</span>
+                    <span>&#8377; <%= listing.price.toLocaleString("en-IN") %></span>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Cleaning & Service Fee:</span>
+                    <span>&#8377; 500</span>
+                </div>
+                
+                <hr>
+                <div class="d-flex justify-content-between align-items-center fw-bold fs-5 mb-4">
+                    <span>Total (INR):</span>
+                    <span class="text-success">&#8377; <%= (totalPrice + 500).toLocaleString("en-IN") %></span>
+                </div>
+
+                <div class="payment-section text-center p-3 bg-light rounded border">
+                    <p class="mb-2"><strong>Scan with GPay or any UPI App</strong></p>
+                    <img src="<%= qrCodeImage %>" alt="Payment QR Code" class="img-fluid qr-code mb-3">
+                    <p class="small text-muted">Merchant: WanderLust Payments</p>
+                </div>
+
+                <form action="/listings/<%= listing._id %>/final" method="POST" class="mt-4">
+                    <button class="btn btn-danger w-100 py-2 fs-5 shadow-sm">Complete Booking</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
