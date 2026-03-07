@@ -5,7 +5,7 @@
         <form method="POST" action="/listings/<%= listing._id %>/confirm" novalidate class="needs-validation">
             <div class="mb-3">
                 <label for="checkIn" class="form-label">Check-in Date</label>
-                <input type="date" name="booking[checkIn]" class="form-control" required>
+                <input type="date" name="booking[checkIn]" class="form-control" id="checkIn" required>
             </div>
             <div class="mb-3">
                 <label for="checkOut" class="form-label">Check-out Date</label>
@@ -19,3 +19,16 @@
         </form>
     </div>
 </div>
+<script>
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Set the min attribute for check-in
+    const checkInInput = document.getElementById('checkIn');
+    checkInInput.setAttribute('min', today);
+
+    // Logic: Check-out must be at least one day after Check-in
+    checkInInput.addEventListener('change', function() {
+        const checkOutInput = document.getElementById('checkOut');
+        checkOutInput.setAttribute('min', this.value);
+    });
+</script>

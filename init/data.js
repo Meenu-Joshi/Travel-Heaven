@@ -359,7 +359,7 @@ const sampleListings = [
     price: 1500,
     location: "Malibu",
     country: "United States",
-    owner: "65c1f28b3a042948e918233e", // Replace with your actual User ID
+    owner: "66679f0d9d3f1b0bba0cb7c5", // Replace with your actual User ID
     bookings: [],
   },
   {
@@ -372,7 +372,7 @@ const sampleListings = [
     price: 1200,
     location: "New York City",
     country: "United States",
-    owner: "65c1f28b3a042948e918233e",
+    owner: "66679f0d9d3f1b0bba0cb7c5",
     bookings: [],
   },
   {
@@ -385,7 +385,7 @@ const sampleListings = [
     price: 1000,
     location: "Aspen",
     country: "United States",
-    owner: "65c1f28b3a042948e918233e",
+    owner: "66679f0d9d3f1b0bba0cb7c5",
     bookings: [],
   },
   {
@@ -398,7 +398,7 @@ const sampleListings = [
     price: 1800,
     location: "Amsterdam",
     country: "Netherlands",
-    owner: "65c1f28b3a042948e918233e",
+    owner: "66679f0d9d3f1b0bba0cb7c5",
     bookings: [],
   },
   {
@@ -411,7 +411,7 @@ const sampleListings = [
     price: 5000,
     location: "Maldives",
     country: "Maldives",
-    owner: "65c1f28b3a042948e918233e",
+    owner: "66679f0d9d3f1b0bba0cb7c5",
     bookings: [],
   },
   {
@@ -424,7 +424,7 @@ const sampleListings = [
     price: 2500,
     location: "Amalfi Coast",
     country: "Italy",
-    owner: "65c1f28b3a042948e918233e",
+    owner: "66679f0d9d3f1b0bba0cb7c5",
     bookings: [],
   },
   {
@@ -437,7 +437,7 @@ const sampleListings = [
     price: 800,
     location: "Bali",
     country: "Indonesia",
-    owner: "65c1f28b3a042948e918233e",
+    owner: "66679f0d9d3f1b0bba0cb7c5",
     bookings: [],
   },
   {
@@ -450,7 +450,7 @@ const sampleListings = [
     price: 1600,
     location: "Paris",
     country: "France",
-    owner: "65c1f28b3a042948e918233e",
+    owner: "66679f0d9d3f1b0bba0cb7c5",
     bookings: [],
   },
   {
@@ -463,7 +463,7 @@ const sampleListings = [
     price: 2200,
     location: "Maasai Mara",
     country: "Kenya",
-    owner: "65c1f28b3a042948e918233e",
+    owner: "66679f0d9d3f1b0bba0cb7c5",
     bookings: [],
   },
   {
@@ -476,7 +476,7 @@ const sampleListings = [
     price: 1400,
     location: "Kyoto",
     country: "Japan",
-    owner: "65c1f28b3a042948e918233e",
+    owner: "66679f0d9d3f1b0bba0cb7c5",
     bookings: [],
   },
   {
@@ -489,7 +489,7 @@ const sampleListings = [
     price: 1100,
     location: "Wadi Rum",
     country: "Jordan",
-    owner: "65c1f28b3a042948e918233e",
+    owner: "66679f0d9d3f1b0bba0cb7c5",
     bookings: [],
   }
 ];

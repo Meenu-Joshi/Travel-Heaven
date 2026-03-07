@@ -22,6 +22,50 @@ router.post("/:id/confirm", isLoggedIn, async (req, res) => {
     let { id } = req.params;
     let { checkIn, checkOut, guests } = req.body.booking;
 
+    router.post("/:id/confirm", isLoggedIn, async (req, res) => {
+    let { id } = req.params;
+    let { checkIn, checkOut, guests } = req.body.booking;
+
+    // 1. Find the listing to get its price
+    const listing = await Listing.findById(id);
+
+    // 2. Check for booking conflicts (This is your gatekeeper)
+    const existingBooking = await Booking.findOne({
+        listing: id,
+        $or: [
+            { checkIn: { $lt: new Date(checkOut) }, checkOut: { $gt: new Date(checkIn) } }
+        ]
+    });
+
+    // 3. If a conflict exists, stop and show an error
+    if (existingBooking) {
+        req.flash("error", "Sorry, this Vista is already booked for these dates!");
+        return res.redirect(`/listings/${id}`);
+    }
+
+    // 4. Calculate price
+    const days = (new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24);
+    const totalPrice = days * listing.price;
+
+    // 5. SAVE THE BOOKING (This prevents the second booking)
+    const newBooking = new Booking({
+        checkIn: new Date(checkIn),
+        checkOut: new Date(checkOut),
+        guests: guests,
+        totalPrice: totalPrice,
+        guest: req.user._id,
+        listing: id
+    });
+    await newBooking.save();
+
+    // 6. Generate QR Code
+    const QRCode = require('qrcode');
+    const upiLink = `upi://pay?pa=your-vpa@upi&pn=ExploreVista&am=${totalPrice}&cu=INR`;
+    const qrCodeImage = await QRCode.toDataURL(upiLink);
+
+    res.render("listing/summary.ejs", { listing, checkIn, checkOut, totalPrice, qrCodeImage });
+});
+
     // 1. Conflict Check (Keep your existing code here)
     const conflict = await Booking.findOne({
         listing: id,
@@ -32,7 +76,7 @@ router.post("/:id/confirm", isLoggedIn, async (req, res) => {
         req.flash("error", "These dates are already booked!");
         return res.redirect(`/listings/${id}`);
     }
-
+    
     // 2. Price Calculation
     const listing = await Listing.findById(id);
     const days = (new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24);
