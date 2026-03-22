@@ -83,6 +83,14 @@ app.use(express.static(path.join(__dirname,"/public")));
 
 app.use(session(sessionOptions));
 app.use(flash());
+app.use(flash());
+
+// 1. MUST ADD THIS: Allows your AI route to read JSON data
+app.use(express.json()); 
+
+// 2. Import and Use Chatbot Router
+const chatbotRouter = require("./router/chatbot.js");
+app.use("/chatbot", chatbotRouter);
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -92,7 +100,9 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 
+// Inside app.js
 
+app.use(express.json()); // ADD THIS LINE HERE
 
 
 app.use((req,res,next)=>{
@@ -108,8 +118,6 @@ app.use("/listings", bookingRouter);
 app.use("/listings",listingRouter);
 app.use("/listings/:id/reviews",reviewRouter);
 app.use("/",userRouter);
-
-
 
 
 

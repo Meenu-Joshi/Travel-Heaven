@@ -22,8 +22,22 @@
                 <%- body -%>
     </div>
     <%-include("../includes/footer.ejs") %>
-    <script src="/js/script.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+   <div id="chat-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+
+    <button type="button" id="chat-toggle" class="btn btn-danger rounded-circle p-3">💬</button>
+    <div id="chat-box" class="card shadow d-none" style="width: 300px; height: 400px;">
+        <div class="card-header bg-danger text-white">ExploreVista AI</div>
+        <div id="chat-messages" class="card-body overflow-auto" style="height: 300px;"></div>
+        <div class="card-footer">
+            <div class="input-group">
+                <input type="text" id="user-input" class="form-control" placeholder="Ask me...">
+                <button id="send-btn" class="btn btn-danger">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+ <script src="/js/script.js"></script>
 </body>
 </html>
