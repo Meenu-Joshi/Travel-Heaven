@@ -78,6 +78,7 @@ app.set("views",path.join(__dirname,"/views"));
 app.set("view engine","ejs");
 app.use(express.urlencoded({extended:true}));
 app.use(methodOverride('_method'));
+app.use(express.json());
 app.engine("ejs",ejsMate);
 app.use(express.static(path.join(__dirname,"/public")));
 
@@ -86,7 +87,7 @@ app.use(flash());
 app.use(flash());
 
 // 1. MUST ADD THIS: Allows your AI route to read JSON data
-app.use(express.json()); 
+ 
 
 // 2. Import and Use Chatbot Router
 const chatbotRouter = require("./router/chatbot.js");
@@ -100,9 +101,6 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 
-// Inside app.js
-
-app.use(express.json()); // ADD THIS LINE HERE
 
 
 app.use((req,res,next)=>{

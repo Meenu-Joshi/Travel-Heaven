@@ -1,4 +1,7 @@
 const Listing=require("../models/listing.js");
+const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
+const mapToken = process.env.MAPBOX_TOKEN;
+const geocoder = mbxGeocoding({ accessToken: mapToken });
 
 module.exports.index=async (req,res)=>{
     const listings= await Listing.find({});
@@ -8,14 +11,32 @@ module.exports.index=async (req,res)=>{
 module.exports.renderNewListing=(req,res)=>{
     res.render("listing/new.ejs");  
 };
-module.exports.createNewListing=async (req,res,next)=>{
-    let url=req.file.path;
-    let filename=req.file.filename;
-    const newListing=new Listing(req.body.listing);
-    newListing.owner=req.user._id;
-    newListing.image={url,filename};
+module.exports.createNewListing = async (req, res, next) => {
+    // 1. Get coordinates from Mapbox based on the location entered in the form
+    let response = await geocoder.forwardGeocode({
+        query: req.body.listing.location,
+        limit: 1,
+    }).send();
+
+    // 2. Create the new listing object
+    const newListing = new Listing(req.body.listing);
+    
+    // 3. Save the geometry (coordinates) to the listing
+    // response.body.features[0].geometry contains the GeoJSON 'Point'
+    newListing.geometry = response.body.features[0].geometry;
+    
+    // 4. Set the owner and handle the image upload
+    newListing.owner = req.user._id;
+    
+    if (typeof req.file !== "undefined") {
+        let url = req.file.path;
+        let filename = req.file.filename;
+        newListing.image = { url, filename };
+    }
+    
+    // 5. Save to MongoDB Atlas and redirect
     await newListing.save();
-    req.flash("success","New listing added");
+    req.flash("success", "New listing added");
     res.redirect("/listings");
 };
 // module.exports.showListing=async (req,res)=>{
