@@ -20,12 +20,12 @@ main()
 
   const initDb=async function(){  
     await Listing.deleteMany({});
-  //  initData.data=initData.data.map((obj)=>({...obj,owner:"66679f0d9d3f1b0bba0cb7c5"}))
-  //   await Listing.insertMany(initData.data).then((res)=>{
-  //       console.log("Data is intialized");
-  //   }).catch((err)=>{
-  //       console.log(err);
-  //   });
+   initData.data=initData.data.map((obj)=>({...obj,owner:"66679f0d9d3f1b0bba0cb7c5"}))
+    await Listing.insertMany(initData.data).then((res)=>{
+        console.log("Data is intialized");
+    }).catch((err)=>{
+        console.log(err);
+    });
 
    
   }

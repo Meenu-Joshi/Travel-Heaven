@@ -92,7 +92,34 @@
   </div>
 </div>
 
-  
+  <div class="col-8 offset-3 mb-3">
+    <h3>Where you’ll be</h3>
+    <div id="map" style="height: 400px; width: 100%;"></div>
+</div>
+<script>
+    // 1. Set Access Token
+    mapboxgl.accessToken = "<%= process.env.MAPBOX_TOKEN %>";
+
+    // 2. Safely parse coordinates from EJS to JS
+    const coordinates = <%- JSON.stringify(listing.geometry.coordinates) %>;
+
+    // 3. Initialize the map
+    const map = new mapboxgl.Map({
+        container: 'map', 
+        style: 'mapbox://styles/mapbox/streets-v12', 
+        center: coordinates, // No manual brackets [ ] needed
+        zoom: 9 
+    });
+
+    // 4. Add the marker
+    new mapboxgl.Marker({ color: "red" })
+        .setLngLat(coordinates)
+        .setPopup(
+            new mapboxgl.Popup({ offset: 25 })
+            .setHTML("<h4><%= listing.title %></h4><p>Exact location provided after booking</p>")
+        )
+        .addTo(map);
+</script>
 </body>
 
 

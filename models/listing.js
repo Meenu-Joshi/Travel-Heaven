@@ -35,6 +35,17 @@ const listingSchema=new schema({
             ref: "Booking",
         }
     ],
+    geometry: {
+    type: {
+        type: String,
+        enum: ['Point'], // Must be 'Point'
+        required: true
+    },
+    coordinates: {
+        type: [Number], // [longitude, latitude]
+        required: true
+    }
+},
 
 }
 )
