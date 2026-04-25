@@ -8,6 +8,8 @@ const { isLoggedIn } = require("../middleware.js");
 
 // In router/booking.js
 router.get("/:id/book", isLoggedIn, async (req, res) => {
+
+    
     let { id } = req.params;
     // Ensure Listing is required at the top of this file!
     const listing = await Listing.findById(id); 
