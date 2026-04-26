@@ -14,9 +14,25 @@ const getRazorpayInstance = () => {
     });
 };
 
+// 1. GET: Render Booking Form with Duplicate Check
+// 1. GET: Render Booking Form with "Past Stay" logic
 router.get("/book", isLoggedIn, async (req, res) => {
     let { id } = req.params;
-    const listing = await Listing.findById(id); 
+    
+    // Check for a confirmed booking that is either active today or in the future
+    const activeBooking = await Booking.findOne({ 
+        listing: id, 
+        guest: req.user._id, 
+        status: "Confirmed",
+        checkOut: { $gte: new Date() } // This ensures only future/current stays block the user
+    });
+
+    if (activeBooking) {
+        req.flash("error", "You already have an upcoming stay at this destination!");
+        return res.redirect(`/listings/${id}`);
+    }
+
+    const listing = await Listing.findById(id);
     if (!listing) {
         req.flash("error", "Listing not found!");
         return res.redirect("/listings");
@@ -24,12 +40,14 @@ router.get("/book", isLoggedIn, async (req, res) => {
     res.render("listing/book.ejs", { listing });
 });
 
+// 2. POST: Create Razorpay Order
 router.post("/confirm", isLoggedIn, async (req, res) => {
     try {
         let { id } = req.params;
-        let { checkIn, checkOut } = req.body.booking;
+        let { checkIn, checkOut, guests } = req.body.booking;
         const listing = await Listing.findById(id);
 
+        // Date conflict check logic
         const conflict = await Booking.findOne({
             listing: id,
             $or: [
@@ -42,21 +60,35 @@ router.post("/confirm", isLoggedIn, async (req, res) => {
             return res.redirect(`/listings/${id}`);
         }
 
+        // --- FIXED: Define amount BEFORE using it in razorpay order ---
         const days = (new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24);
-        const amount = Math.round((days * listing.price) * 100);
+        const amount = Math.round((days * listing.price) * 100); 
 
-        // Initialize and create the order
-        const razorpay = getRazorpayInstance(); 
+        const razorpay = getRazorpayInstance();
         const order = await razorpay.orders.create({
-            amount: amount,
+            amount: amount, // amount is now properly defined here
             currency: "INR",
-            receipt: `rcpt_${id.toString().slice(-15)}` 
+            receipt: `rcpt_${id.toString().slice(-15)}`
         });
+
+        // Save a 'Pending' booking record
+        const newBooking = new Booking({
+            listing: id,
+            guest: req.user._id,
+            checkIn,
+            checkOut,
+            guests, // Included to fix validation error
+            totalPrice: (amount / 100),
+            razorpay_order_id: order.id,
+            status: "Pending"
+        });
+        await newBooking.save();
 
         res.render("listing/summary.ejs", { 
             listing, 
             checkIn, 
             checkOut, 
+            guests,
             totalPrice: (amount / 100), 
             order,
             razorpay_key: process.env.RAZORPAY_KEY_ID 
@@ -69,21 +101,65 @@ router.post("/confirm", isLoggedIn, async (req, res) => {
     }
 });
 
+// 3. POST: Verify Payment and Update Status
 router.post("/verify-payment", isLoggedIn, async (req, res) => {
     try {
-        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature, listingId } = req.body;
         const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET);
         hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
         const generated_signature = hmac.digest("hex");
 
         if (generated_signature === razorpay_signature) {
+            // Confirm the booking status in the database
+            await Booking.findOneAndUpdate(
+                { razorpay_order_id: razorpay_order_id },
+                { status: "Confirmed", paymentId: razorpay_payment_id }
+            );
+
             req.flash("success", "Payment Successful! Your stay is confirmed.");
-            res.json({ status: "success" });
+            res.json({ status: "success", redirectUrl: `/listings/${listingId}/bookings/success` });
         } else {
             res.status(400).json({ status: "failure", message: "Invalid Signature" });
         }
     } catch (err) {
         res.status(500).json({ status: "error", message: err.message });
+    }
+});
+
+// 4. GET: Success Page
+router.get("/success", isLoggedIn, (req, res) => {
+    res.render("listing/success.ejs");
+});
+
+// router/booking.js
+
+router.post("/book-cod", isLoggedIn, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { checkIn, checkOut, guests } = req.body.booking;
+
+        // 1. Create the new booking in your database
+        const newBooking = new Booking({
+            listing: id,
+            guest: req.user._id,
+            checkIn,
+            checkOut,
+            guests,
+            status: "Confirmed", // COD is confirmed immediately in this logic
+            paymentMethod: "COD"
+        });
+
+        await newBooking.save();
+
+        // 2. Set the success message
+        req.flash("success", "Booking confirmed! You can pay when you arrive at the property.");
+
+        // 3. Redirect to the success page
+        res.redirect(`/listings/${id}/bookings/success`); 
+    } catch (err) {
+        console.error("COD Booking Error:", err);
+        req.flash("error", "Failed to process offline booking.");
+        res.redirect("back");
     }
 });
 
