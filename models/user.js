@@ -6,8 +6,14 @@ const userSchema=new Schema({
     email:{
         required:true,
         type:String
-    }
+    },
+
+ resetPasswordToken: String,
+  resetPasswordExpires: Date
 });
 userSchema.plugin(passportLocalMongoose);
 
 module.exports = mongoose.model('User', userSchema);
+
+
+

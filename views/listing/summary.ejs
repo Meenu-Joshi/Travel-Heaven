@@ -1,105 +1,98 @@
 <% layout('layout/boilerplate') -%>
-<div class="row mt-3 mb-5 ">
+<div class="row mt-3 mb-5">
     <div class="col-md-6 offset-md-3">
-        <h2 class="text-center mb-4">Confirm Your Stay</h2>
-        
-        <div class="card booking-summary-card shadow">
+        <div class="card shadow">
             <div class="card-header bg-dark text-white text-center">
-                <h4>Booking Invoice</h4>
+                <h4>Booking Summary</h4>
             </div>
-            <div class="card-body p-5">
-                <h5 class="card-title text-primary"><%= listing.title %></h5>
-                <p class="text-muted"><%= listing.location %>, <%= listing.country %></p>
+            <div class="card-body p-4">
+                <h5><%= listing.title %></h5>
+                <p class="text-muted"><%= checkIn %> to <%= checkOut %></p>
                 <hr>
-                
-                <div class="row mb-3">
-                    <div class="col-6">
-                        <p class="mb-0"><strong>Check-In:</strong></p>
-                        <p><%= checkIn %></p>
-                    </div>
-                    <div class="col-6">
-                        <p class="mb-0"><strong>Check-Out:</strong></p>
-                        <p><%= checkOut %></p>
-                    </div>
+                <div class="d-flex justify-content-between mb-4">
+                    <strong>Total Amount:</strong>
+                    <span class="text-success fw-bold">&#8377; <%= totalPrice.toLocaleString("en-IN") %></span>
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span>Price per night:</span>
-                    <span>&#8377; <%= listing.price.toLocaleString("en-IN") %></span>
+                <h6 class="mb-3">Select Payment Method:</h6>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="radio" name="paymentMethod" id="payOnline" value="online" checked>
+                    <label class="form-check-label" for="payOnline">Pay Online (Razorpay/UPI/Cards)</label>
                 </div>
-                
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span>Cleaning & Service Fee:</span>
-                    <span>&#8377; 500</span>
-                </div>
-                
-                <hr>
-                <!-- <div class="d-flex justify-content-between align-items-center fw-bold fs-5 mb-4">
-                    <span>Total (INR):</span>
-                    <span class="text-success">&#8377; <%= (totalPrice + 500).toLocaleString("en-IN") %></span>
-                </div> -->
-<div class="card-body">
-    <h5 class="mt-4">Select Payment Method</h5>
-    <form action="/listings/<%= listing._id %>/final" method="POST" id="payment-form">
-        <input type="hidden" name="booking[checkIn]" value="<%= checkIn %>">
-        <input type="hidden" name="booking[checkOut]" value="<%= checkOut %>">
-
-        <div class="list-group mb-3">
-            <label class="list-group-item d-flex gap-3">
-                <input class="form-check-input flex-shrink-0" type="radio" name="paymentMethod" value="UPI" checked>
-                <span>
-                    <strong>UPI / GPay</strong>
-                    <small class="d-block text-muted">Scan the QR code below</small>
-                </span>
-            </label>
-
-           
-
-            <label class="list-group-item d-flex gap-3">
-                <input class="form-check-input flex-shrink-0" type="radio" name="paymentMethod" value="COD">
-                <span>
-                    <strong>Pay at Property (COD)</strong>
-                    <small class="d-block text-muted">Pay during check-in</small>
-                </span>
-            </label>
-        </div>
-
-        <div id="qr-section" class="text-center p-3 bg-light rounded border mb-3">
-            <p class="mb-2"><strong>Scan to Pay</strong></p>
-            <img src="<%= qrCodeImage %>" alt="QR Code" class="img-fluid" style="max-width: 150px;">
-        </div>
-
-        <button class="btn btn-danger w-100 py-2">Confirm Booking</button>
-    </form>
-</div>
-
-<!-- 
-                <div class="payment-section text-center p-3 bg-light rounded border">
-                    <p class="mb-2"><strong>Scan with GPay or any UPI App</strong></p>
-                    <img src="<%= qrCodeImage %>" alt="Payment QR Code" class="img-fluid qr-code mb-3">
-                    <p class="small text-muted">Merchant: WanderLust Payments</p>
+                <div class="form-check mb-4">
+                    <input class="form-check-input" type="radio" name="paymentMethod" id="payOffline" value="cod">
+                    <label class="form-check-label" for="payOffline">Pay at Property (COD)</label>
                 </div>
 
-                <form action="/listings/<%= listing._id %>/final" method="POST" class="mt-4">
-                    <button class="btn btn-danger w-100 py-2 fs-5 shadow-sm">Complete Booking</button>
-                </form> -->
+                <div id="online-pay-div">
+                    <button id="rzp-button" class="btn btn-danger w-100 py-2">Pay Online Now</button>
+                </div>
+
+                <form action="/listings/<%= listing._id %>/book-cod" method="POST" id="cod-form" style="display: none;">
+                    <input type="hidden" name="booking[checkIn]" value="<%= checkIn %>">
+                    <input type="hidden" name="booking[checkOut]" value="<%= checkOut %>">
+                    <input type="hidden" name="booking[totalPrice]" value="<%= totalPrice %>">
+                    <button class="btn btn-dark w-100 py-2">Confirm Booking (Pay Later)</button>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
-    // Logic to hide/show QR code based on selection
-    const radios = document.querySelectorAll('input[name="paymentMethod"]');
-    const qrSection = document.getElementById('qr-section');
+    // 1. Toggle between Razorpay and COD
+    const onlineRadio = document.getElementById('payOnline');
+    const offlineRadio = document.getElementById('payOffline');
+    const onlineDiv = document.getElementById('online-pay-div');
+    const codForm = document.getElementById('cod-form');
 
-    radios.forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            if (e.target.value === 'UPI') {
-                qrSection.style.display = 'block';
-            } else {
-                qrSection.style.display = 'none';
-            }
-        });
+    offlineRadio.addEventListener('change', () => {
+        onlineDiv.style.display = 'none';
+        codForm.style.display = 'block';
     });
+
+    onlineRadio.addEventListener('change', () => {
+        onlineDiv.style.display = 'block';
+        codForm.style.display = 'none';
+    });
+
+    // 2. Razorpay Logic - ONLY ONE OPTIONS OBJECT
+    const options = {
+        "key": "<%= razorpay_key %>",
+        "amount": "<%= order.amount %>",
+        "currency": "INR",
+        "name": "Travel Heaven",
+        "order_id": "<%= order.id %>",
+        "handler": async function (response) {
+            // This sends the data to your /listings/verify-payment route
+            const res = await fetch("/listings/verify-payment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature
+                })
+            });
+
+            const data = await res.json();
+            if (data.status === "success") {
+                window.location.href = "/listings"; // Redirect after success
+            } else {
+                alert("Payment Verification Failed: " + (data.message || "Unknown error"));
+            }
+        },
+        "prefill": {
+            "name": "<%= currUser.username %>",
+            "email": "<%= currUser.email %>"
+        },
+        "theme": { "color": "#fe424d" }
+    };
+
+    const rzp = new Razorpay(options);
+    document.getElementById('rzp-button').onclick = (e) => { 
+        rzp.open(); 
+        e.preventDefault(); 
+    };
 </script>
