@@ -1,4 +1,4 @@
-require('dotenv').config(); // Load variables as the very first step
+require('dotenv').config(); 
 
 const express = require("express");
 const app = express();
@@ -16,7 +16,6 @@ const LocalStrategy = require("passport-local");
 const User = require("./models/user.js");
 
 // Routers
-
 const listingRouter = require("./router/listing.js");
 const reviewRouter = require("./router/reviews.js");
 const userRouter = require("./router/user.js");
@@ -55,53 +54,56 @@ const sessionOptions = {
     }
 };
 
-// Middlewares
+// Middlewares - Setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 app.engine("ejs", ejsMate);
+
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); 
 app.use(methodOverride('_method'));
 
+// Session and Flash must come before Passport
 app.use(session(sessionOptions));
 app.use(flash());
 
-// Passport
+// Passport Configuration
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+// Global Variables Middleware (Must be AFTER Passport)
 app.use((req, res, next) => {
     res.locals.successMsg = req.flash("success");
     res.locals.errorMsg = req.flash("error");
-    res.locals.currUser = req.user;
+    res.locals.currUser = req.user || null; // Fixes the "currUser is not defined" error
     next();
 });
 
-// --- ROUTE ORDER ---
-// This tells Express: any URL starting with /listings/ID/bookings 
-// should be handled by the bookingRouter.
-
-// app.use("/listings", bookingRouter); // Bookings first
+// --- Routes ---
 app.use("/listings/:id/bookings", bookingRouter);
 app.use("/listings", listingRouter); 
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/chatbot", chatbotRouter);
 app.use("/", userRouter);
 
+// 404 Error Handling
 app.all("*", (req, res, next) => {
     const ExpressError = require("./utils/ExpressError.js");
     next(new ExpressError(404, "Page Not Found!"));
 });
 
+// Generic Error Handler
 app.use((err, req, res, next) => {
     let { status = 500, message = "Something went wrong" } = err;
     res.status(status).render("listing/error.ejs", { err: message });
 });
 
-app.listen(3000, () => {
-    console.log("Server is listening on port 3000");
+// Dynamic Port Binding for Render
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+    console.log(`Server is listening on port ${port}`);
 });
