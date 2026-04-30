@@ -8,6 +8,7 @@
             <div class="card-body p-4">
                 <h5><%= listing.title %></h5>
                 <p class="text-muted"><%= checkIn %> to <%= checkOut %></p>
+                <p class="text-muted">Guests: <%= guests %></p>
                 <hr>
                 <div class="d-flex justify-content-between mb-4">
                     <strong>Total Amount:</strong>
@@ -15,6 +16,7 @@
                 </div>
 
                 <h6 class="mb-3">Select Payment Method:</h6>
+                
                 <div class="form-check mb-2">
                     <input class="form-check-input" type="radio" name="paymentMethod" id="payOnline" value="online" checked>
                     <label class="form-check-label" for="payOnline">Pay Online (Razorpay/UPI/Cards)</label>
@@ -28,10 +30,10 @@
                     <button id="rzp-button" class="btn btn-danger w-100 py-2">Pay Online Now</button>
                 </div>
 
-                <form action="/listings/<%= listing._id %>/book-cod" method="POST" id="cod-form" style="display: none;">
+                <form action="/listings/<%= listing._id %>/bookings/book-cod" method="POST" id="cod-form" style="display: none;">
                     <input type="hidden" name="booking[checkIn]" value="<%= checkIn %>">
                     <input type="hidden" name="booking[checkOut]" value="<%= checkOut %>">
-                    <input type="hidden" name="booking[totalPrice]" value="<%= totalPrice %>">
+                    <input type="hidden" name="booking[guests]" value="<%= guests %>">
                     <button class="btn btn-dark w-100 py-2">Confirm Booking (Pay Later)</button>
                 </form>
             </div>
@@ -41,23 +43,28 @@
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
-    // 1. Toggle between Razorpay and COD
+    // 1. SELECT ELEMENTS
     const onlineRadio = document.getElementById('payOnline');
     const offlineRadio = document.getElementById('payOffline');
     const onlineDiv = document.getElementById('online-pay-div');
     const codForm = document.getElementById('cod-form');
 
+    // 2. TOGGLE LOGIC
     offlineRadio.addEventListener('change', () => {
-        onlineDiv.style.display = 'none';
-        codForm.style.display = 'block';
+        if (offlineRadio.checked) {
+            onlineDiv.style.display = 'none';
+            codForm.style.display = 'block';
+        }
     });
 
     onlineRadio.addEventListener('change', () => {
-        onlineDiv.style.display = 'block';
-        codForm.style.display = 'none';
+        if (onlineRadio.checked) {
+            onlineDiv.style.display = 'block';
+            codForm.style.display = 'none';
+        }
     });
 
-    // 2. Razorpay Logic - ONLY ONE OPTIONS OBJECT
+    // 3. RAZORPAY CONFIGURATION
     const options = {
         "key": "<%= razorpay_key %>",
         "amount": "<%= order.amount %>",
@@ -65,22 +72,27 @@
         "name": "Travel Heaven",
         "order_id": "<%= order.id %>",
         "handler": async function (response) {
-            // This sends the data to your /listings/verify-payment route
-            const res = await fetch("/listings/verify-payment", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    razorpay_order_id: response.razorpay_order_id,
-                    razorpay_payment_id: response.razorpay_payment_id,
-                    razorpay_signature: response.razorpay_signature
-                })
-            });
+            try {
+                const res = await fetch("/listings/<%= listing._id %>/bookings/verify-payment", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_signature: response.razorpay_signature,
+                        listingId: "<%= listing._id %>"
+                    })
+                });
 
-            const data = await res.json();
-            if (data.status === "success") {
-                window.location.href = "/listings"; // Redirect after success
-            } else {
-                alert("Payment Verification Failed: " + (data.message || "Unknown error"));
+                const data = await res.json();
+                if (data.status === "success") {
+                    window.location.href = data.redirectUrl; 
+                } else {
+                    alert("Verification Failed: " + data.message);
+                }
+            } catch (err) {
+                console.error("Verification Error:", err);
+                alert("Something went wrong during payment verification.");
             }
         },
         "prefill": {
@@ -93,6 +105,6 @@
     const rzp = new Razorpay(options);
     document.getElementById('rzp-button').onclick = (e) => { 
         rzp.open(); 
-        e.preventDefault(); 
+        e.preventDefault();
     };
 </script>
