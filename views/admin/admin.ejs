@@ -1,0 +1,97 @@
+<% layout('layout/boilerplate') -%>
+<div class="container mt-4">
+    <h2 class="mb-4">ExploreVista Admin Panel</h2>
+
+    <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#listings">Listings</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#users">Users</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#bookings">Bookings & Payments</button>
+        </li>
+    </ul>
+
+    <div class="tab-content mt-3">
+        <div class="tab-pane fade show active" id="listings">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Title</th>
+                        <th>Owner</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+              <tbody>
+    <% for(let list of listings) { %>
+    <tr>
+        <td><%= list.title %></td>
+        <td><%= list.owner ? list.owner.username : "System" %></td>
+        <td>
+            <div class="d-flex">
+                <a href="/listings/<%= list._id %>/edit" class="btn btn-sm btn-info me-2">Edit</a>
+                
+                <form method="POST" action="/listings/<%=list._id%>?_method=DELETE">
+                    <button class="btn btn-sm btn-danger">Delete</button>
+                </form>
+            </div>
+        </td>
+    </tr>
+    <% } %>
+</tbody>
+            </table>
+        </div>
+
+        <div class="tab-pane fade" id="users">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(let u of users) { %>
+                    <tr>
+                        <td><%= u.username %></td>
+                        <td><%= u.email %></td>
+                        <td><%= u.isAdmin ? "Admin" : "User" %></td>
+                    </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="tab-pane fade" id="bookings">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Customer</th>
+                        <th>Payment Status</th>
+                        <th>Transaction ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(let b of bookings) { %>
+                    <tr>
+                        <td><%= b._id %></td>
+                        <td><%= b.user ? b.user.username : "Guest" %></td>
+                        <td>
+                            <% if(b.paymentStatus === "Completed") { %>
+                                <span class="badge bg-success">Paid</span>
+                            <% } else { %>
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            <% } %>
+                        </td>
+                        <td><code><%= b.transactionId || "N/A" %></code></td>
+                    </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -24,6 +24,11 @@ module.exports.renderNewListing = (req, res) => {
 };
 
 module.exports.createNewListing = async (req, res, next) => {
+    if (!req.body.listing || !req.body.listing.location) {
+        req.flash("error", "Location is required");
+        return res.redirect("/listings/new");
+    }
+
     // 1. Get coordinates from Mapbox based on the location entered in the form
     let response = await geocoder.forwardGeocode({
         query: req.body.listing.location,
@@ -34,7 +39,11 @@ module.exports.createNewListing = async (req, res, next) => {
     const newListing = new Listing(req.body.listing);
     
     // 3. Save the geometry (coordinates) to the listing
-    newListing.geometry = response.body.features[0].geometry;
+    if (response.body.features.length > 0) {
+        newListing.geometry = response.body.features[0].geometry;
+    } else {
+        newListing.geometry = { type: "Point", coordinates: [75.8, 30.9] }; // Default coordinates fallback
+    }
     
     // 4. Set the owner and handle the image upload
     newListing.owner = req.user._id;
@@ -73,7 +82,8 @@ module.exports.showListing = async (req, res) => {
     res.render("listing/show.ejs", { 
         listing, 
         defaultDistance, 
-        calculateFootprint 
+        calculateFootprint,
+        mapToken: process.env.MAPBOX_TOKEN // Safely passes token to the template
     });
 };
 
@@ -81,22 +91,28 @@ module.exports.renderEditForm = async (req, res) => {
     let { id } = req.params;
     let listing = await Listing.findById(id);
 
-    if (typeof req.file !== "undefined") {
-        let url = req.file.path;
-        let filename = req.file.filename;
-        listing.image = { url, filename };
-        await listing.save();    
-    }
-    
     res.render("listing/edit.ejs", { listing });
 };
 
 module.exports.editListing = async (req, res) => {
-    let editedListing = req.body.listing;
     let { id } = req.params;
-    await Listing.findByIdAndUpdate(id, editedListing);
+    
+    // Update basic details
+    await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+    
+    // If there is an uploaded image, save the new path
+    if (typeof req.file !== "undefined") {
+        let updatedListing = await Listing.findById(id);
+        let url = req.file.path;
+        let filename = req.file.filename;
+        updatedListing.image = { url, filename };
+        await updatedListing.save();    
+    }
+    
     req.flash("success", "Listing updated");
-    res.redirect(`/listings/${id}`);    
+    req.session.save(() => {
+        res.redirect(`/listings/${id}`);    
+    });
 };
 
 module.exports.destroyListing = async (req, res) => {
@@ -104,4 +120,39 @@ module.exports.destroyListing = async (req, res) => {
     await Listing.findByIdAndDelete(id);
     req.flash("success", "Listing deleted");
     res.redirect("/listings");
+};
+
+module.exports.editListing = async (req, res) => {
+    let { id } = req.params;
+    
+    // Update the record in MongoDB Atlas
+    let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+    
+    // Handle image updates if a new file was uploaded
+    if (typeof req.file !== "undefined") {
+        let url = req.file.path;
+        let filename = req.file.filename;
+        listing.image = { url, filename };
+        await listing.save();    
+    }
+    
+    req.flash("success", "Listing Updated Successfully!");
+    res.redirect(`/admin/dashboard`); // Redirect back to admin panel
+};
+module.exports.updateListing = async (req, res) => {
+    let { id } = req.params;
+    
+    // 1. Update text fields (this keeps the old image data initially)
+    let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+
+    // 2. Only if a NEW file was chosen, update the Cloudinary data
+    if (typeof req.file !== "undefined") {
+        let url = req.file.path;
+        let filename = req.file.filename;
+        listing.image = { url, filename };
+        await listing.save();
+    }
+
+    req.flash("success", "Listing Updated!");
+    res.redirect(`/listings/${id}`);
 };

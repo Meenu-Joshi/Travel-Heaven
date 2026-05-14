@@ -19,17 +19,7 @@ module.exports.isLoggedIn=((req,res,next)=>{
    next();
  }
 
- module.exports.isOwner=async (req,res,next)=>{
-  let {id}=req.params;
-  let listing=await Listing.findById(id);
-  console.log(id,listing);
-  if(!listing.owner._id.equals(res.locals.currUser._id)){
-    console.log(listing.owner,res.locals.currUser);
-    req.flash("error","you didn't have access.");
-    return res.redirect(`/listings/${id}`);
- }
- next();
- }
+ 
 
  module.exports.validateListing=(req,res,next)=>{
   let {error}=listingSchema.validate(req.body);
@@ -54,14 +44,32 @@ module.exports.validateReview=(req,res,next)=>{
       next();
   }
 }
-
-module.exports.isAuthor=async (req,res,next)=>{
-  let {id,reviewId}=req.params;
-  let review=await Review.findById(reviewId);
-  
-  if(!review.author._id.equals(res.locals.currUser._id)){
-   req.flash("error","you didn't have access.");
-    return res.redirect(`/listings/${id}`);
- }
- next();
- }
+module.exports.isAdmin = (req, res, next) => {
+    if (req.isAuthenticated() && req.user.isAdmin) {
+        return next();
+    }
+    req.flash("error", "You do not have permission to do that!");
+    res.redirect("/listings");
+};
+module.exports.isOwner = async (req, res, next) => {
+    let { id } = req.params;
+    let listing = await Listing.findById(id);
+    
+    // ALLOW access if the user is the owner OR if the user is an admin
+    if (!res.locals.currUser.isAdmin && !listing.owner._id.equals(res.locals.currUser._id)) {
+        req.flash("error", "you didn't have access.");
+        return res.redirect(`/listings/${id}`);
+    }
+    next();
+};
+module.exports.isAuthor = async (req, res, next) => {
+    let { id, reviewId } = req.params;
+    let review = await Review.findById(reviewId);
+    
+    // Check if the user is NOT an admin AND NOT the author of the review
+    if (!res.locals.currUser.isAdmin && !review.author._id.equals(res.locals.currUser._id)) {
+        req.flash("error", "you didn't have access.");
+        return res.redirect(`/listings/${id}`);
+    }
+    next();
+};

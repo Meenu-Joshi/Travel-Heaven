@@ -21,7 +21,7 @@ const reviewRouter = require("./router/reviews.js");
 const userRouter = require("./router/user.js");
 const bookingRouter = require("./router/booking.js");
 const chatbotRouter = require("./router/chatbot.js");
-
+const adminRouter = require("./router/admin.js");
 // Database Connection
 const dbUrl = process.env.ATLASDB_URL;
 
@@ -95,7 +95,10 @@ app.use("/listings/:id/reviews", reviewRouter);
 app.use("/chatbot", chatbotRouter);
 app.use("/", userRouter);
 
-// 404 Error Handling
+// FIX: Move the admin route ABOVE the 404 handler
+app.use("/admin", adminRouter);
+
+// 404 Error Handling (Must be the very last route)
 app.all("*", (req, res, next) => {
     const ExpressError = require("./utils/ExpressError.js");
     next(new ExpressError(404, "Page Not Found!"));

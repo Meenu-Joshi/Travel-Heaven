@@ -50,5 +50,5 @@ const listingSchema=new schema({
 }
 )
 
-const Listing=mongoose.model("listing",listingSchema);
+const Listing=mongoose.model("Listing",listingSchema);
 module.exports=Listing;

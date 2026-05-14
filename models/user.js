@@ -5,9 +5,18 @@ const passportLocalMongoose=require("passport-local-mongoose");
 const userSchema=new Schema({
     email:{
         required:true,
-        type:String
+        type:String,
+        unique: true
     },
-
+    phone: { type: String, unique: true },
+    isEmailVerified: { type: Boolean, default: false },
+    isPhoneVerified: { type: Boolean, default: false },
+    otpCode: String,
+    otpExpires: Date,
+ isAdmin: {
+        type: Boolean,
+        default: false // Most users will not be admins
+    },
  resetPasswordToken: String,
   resetPasswordExpires: Date
 });
