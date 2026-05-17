@@ -134,8 +134,8 @@
 
     <script>
     // 1. Initialize Variables from Controller [cite: 23, 27, 37]
-    const mapToken = "<%= mapToken %>";
-    const weatherKey = "<%= weatherApiKey %>"; 
+    const mapToken = "<%- mapToken %>";
+    const weatherKey = "<%- weatherApiKey %>"; 
     const coordinates = <%- JSON.stringify(listing.geometry.coordinates) %>;
     
     mapboxgl.accessToken = mapToken;
@@ -158,40 +158,50 @@
         .addTo(map);
 
     // 4. Live Tracking & Route Function [cite: 28, 31, 32]
+   // 4. Live Tracking & Route Function
     let directionsLoaded = false;
     let watchId = null;
+    let directions = null; // Move directions to global script scope so we can update it
 
     function loadLiveRoute() {
-        if (!mapboxgl.accessToken || mapboxgl.accessToken === "" || mapboxgl.accessToken === "undefined") {
+        if (!mapToken || mapToken === "" || mapToken === "undefined") {
             console.error("Mapbox Token is missing!");
             return alert("Error: Mapbox token not configured correctly.");
         }
         
+        mapboxgl.accessToken = mapToken;
+        
         if (directionsLoaded) return;
-
         const btn = document.querySelector("button[onclick='loadLiveRoute()']");
         if (btn) btn.innerText = "Tracking your movement...";
 
-        const directions = new MapboxDirections({
+        // 1. Get the transport mode selected by the user in the dropdown menu
+        const transportMode = document.getElementById("transport").value;
+        
+        // 2. Map your form values to valid Mapbox routing profiles
+        let mapboxProfile = 'mapbox/driving-traffic'; // Default fallback
+        if (transportMode === 'train') {
+            mapboxProfile = 'mapbox/walking'; // Mapbox doesn't have trains, walking/cycling acts as an alternative, or stick to driving
+        }
+
+        // 3. Initialize MapboxDirections with the dynamic profile
+        directions = new MapboxDirections({
             accessToken: mapboxgl.accessToken,
             unit: 'metric',
-            profile: 'mapbox/driving-traffic',
+            profile: mapboxProfile, // Set the selected transport profile dynamically
             controls: { inputs: true, instructions: true }
         });
-
+        
         map.addControl(directions, 'top-left');
         directions.setDestination(coordinates);
 
         if (navigator.geolocation) {
-            // watchPosition creates a live link to the user's GPS [cite: 31]
             watchId = navigator.geolocation.watchPosition(
                 position => {
                     const userLoc = [position.coords.longitude, position.coords.latitude];
                     
-                    // Update the route origin in real-time [cite: 32]
                     directions.setOrigin(userLoc);
                     
-                    // Move the camera to follow the user [cite: 33]
                     map.flyTo({
                         center: userLoc,
                         speed: 0.8,
@@ -211,7 +221,6 @@
             alert("Your browser doesn't support live tracking.");
         }
     }
-
     // 5. Weather Functionality Fix [cite: 37, 38]
     async function fetchWeather(lat, lon) {
         if (!weatherKey) return console.error("Weather API key missing");
@@ -230,8 +239,7 @@
             }
         } catch (err) { console.error("Weather failed", err); }
     }
-
-    // 6. Carbon Footprint [cite: 45, 47]
+// 6. Carbon Footprint & Dynamic Map Update
     function calculateFootprint() {
         const transport = document.getElementById("transport").value;
         const dist = 500; 
@@ -239,6 +247,16 @@
         const result = (dist * factors[transport]).toFixed(2);
         document.getElementById("footprint-result").innerHTML = 
             `Estimated emissions for a ${dist} km trip: <b>${result} kg CO₂</b>.`;
+
+        // If the route plugin is already initialized, update its driving profile dynamically!
+        if (directions) {
+            if (transport === 'car') {
+                directions.setProfile('mapbox/driving-traffic');
+            } else if (transport === 'train') {
+                // Changing profile recalculates distances and ETA times on the map panel
+                directions.setProfile('mapbox/cycling'); 
+            }
+        }
     }
-</script>
+   </script>
 </body>

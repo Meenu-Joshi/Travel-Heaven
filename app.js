@@ -101,8 +101,9 @@ app.get("/terms", (req, res) => {
     res.render("pages/terms.ejs");
 });
 
-app.use("/listings/:id/bookings", bookingRouter);
+
 app.use("/listings", listingRouter); 
+app.use("/listings/:id/bookings", bookingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/chatbot", chatbotRouter);
 app.use("/", userRouter);
