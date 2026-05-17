@@ -89,6 +89,18 @@ app.use((req, res, next) => {
 });
 
 // --- Routes ---
+app.get("/", (req, res) => {
+    res.render("pages/home.ejs");
+});
+
+app.get("/privacy", (req, res) => {
+    res.render("pages/privacy.ejs");
+});
+
+app.get("/terms", (req, res) => {
+    res.render("pages/terms.ejs");
+});
+
 app.use("/listings/:id/bookings", bookingRouter);
 app.use("/listings", listingRouter); 
 app.use("/listings/:id/reviews", reviewRouter);

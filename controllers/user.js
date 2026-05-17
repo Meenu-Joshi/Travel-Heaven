@@ -4,23 +4,22 @@ module.exports.renderSignupForm=(req,res)=>{
     res.render("users/signup.ejs");
 };
 
-module.exports.signup = async (req, res) => {
+// controllers/user.js
+module.exports.signup = async (req, res, next) => {
     try {
-        let { username, email, password } = req.body;
-        const newUser = new User({ email, username });
+        let { username, email, password, phone } = req.body;
+        // 1. Create user with phone number
+        const newUser = new User({ email, username, phone }); 
         const registeredUser = await User.register(newUser, password);
         
         req.login(registeredUser, (err) => {
             if (err) return next(err);
-            req.flash("success", "Welcome to ExploreVista!");
-            res.redirect("/listings");
+            
+            // 2. Instead of going to /listings, go to the verification trigger
+            // This will automatically call your sendOTP logic
+            res.redirect("/verify/email"); 
         });
     } catch (e) {
-        // Check if the error is a duplicate email error
-        if (e.code === 11000 || e.name === 'UserExistsError') {
-            req.flash("error", "A user with that email or username already exists.");
-            return res.redirect("/signup");
-        }
         req.flash("error", e.message);
         res.redirect("/signup");
     }
@@ -97,4 +96,59 @@ user.resetPasswordExpires = Date.now() + 3600000; // 1 hour from now
         req.flash("success", "Password updated successfully!");
         res.redirect("/listings");
     });
+};
+const nodemailer = require("nodemailer");
+const twilio = require("twilio")(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
+
+// Helper: Generate 6-digit OTP
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
+
+module.exports.sendOTP = async (req, res) => {
+    const { type } = req.params; // 'email' or 'phone'
+    const otp = generateOTP();
+    const user = await User.findById(req.user._id);
+
+    user.otpCode = otp;
+    user.otpExpires = Date.now() + 300000; // Valid for 5 mins
+    await user.save();
+
+    if (type === "email") {
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
+        });
+        await transporter.sendMail({
+            to: user.email,
+            subject: "Your Verification Code",
+            text: `Your OTP is: ${otp}`
+        });
+    } else if (type === "phone") {
+        await twilio.messages.create({
+            body: `Your ExploreVista OTP is: ${otp}`,
+            from: process.env.TWILIO_PHONE,
+            to: user.phone
+        });
+    }
+    res.render("users/verify.ejs", { type });
+};
+
+module.exports.verifyOTP = async (req, res) => {
+    const { otp } = req.body;
+    const { type } = req.params;
+    const user = await User.findById(req.user._id);
+
+    if (user.otpCode === otp && user.otpExpires > Date.now()) {
+        if (type === "email") user.isEmailVerified = true;
+        if (type === "phone") user.isPhoneVerified = true;
+        
+        user.otpCode = undefined;
+        user.otpExpires = undefined;
+        await user.save();
+        
+        req.flash("success", `${type} verified successfully!`);
+        res.redirect("/listings");
+    } else {
+        req.flash("error", "Invalid or expired OTP.");
+        res.redirect("back");
+    }
 };

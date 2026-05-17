@@ -7,6 +7,7 @@ const { saveRedirectUrl } = require("../middleware.js");
 const userController = require("../controllers/user.js");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
+const { isLoggedIn } = require("../middleware.js");
 
 // --- Existing Routes ---
 router.route("/signup")
@@ -108,5 +109,7 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS,
     },
 });
-
+// router/user.js
+router.get("/verify/:type", isLoggedIn, userController.sendOTP);
+router.post("/verify/:type", isLoggedIn, userController.verifyOTP);
 module.exports = router;

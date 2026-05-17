@@ -1,0 +1,207 @@
+<% layout('layout/boilerplate') -%>
+<style>
+    :root {
+        --primary-red: #fe424d;
+        --glass: rgba(255, 255, 255, 0.15);
+    }
+
+    .hero-container {
+        position: relative;
+        height: 100vh;
+        width: 100%;
+        margin-top: -100px;
+        background: #020d18;
+        overflow: hidden;
+    }
+
+    .hero-video-bg {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.6;
+        animation: slowZoom 20s infinite alternate;
+    }
+
+    @keyframes slowZoom {
+        from { transform: scale(1); }
+        to { transform: scale(1.15); }
+    }
+
+    .hero-overlay {
+        position: relative;
+        z-index: 10;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        color: white;
+        padding: 0 20px;
+    }
+
+    .brand-title {
+        font-size: clamp(3rem, 10vw, 7rem);
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 5px;
+        margin-bottom: 10px;
+        text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        animation: dropIn 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .glass-cta {
+        background: var(--glass);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255,255,255,0.2);
+        padding: 40px;
+        border-radius: 30px;
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        transition: transform 0.4s ease;
+    }
+
+    .glass-cta:hover {
+        transform: translateY(-10px);
+        border-color: var(--primary-red);
+    }
+
+    /* --- NEW: THE ANIMATED AIRPLANE --- */
+    .airplane-path {
+        position: absolute;
+        top: 20%;
+        left: -10%;
+        z-index: 5;
+        font-size: 3rem;
+        color: rgba(255,255,255,0.8);
+        filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
+        animation: flyAcross 15s linear infinite;
+        transform: rotate(15deg);
+    }
+
+    /* Subtle trail behind the plane */
+    .airplane-path::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        right: 100%;
+        width: 200px;
+        height: 2px;
+        background: linear-gradient(to left, rgba(255,255,255,0.8), transparent);
+        transform: translateY(-50%);
+    }
+
+    @keyframes flyAcross {
+        0% { left: -10%; top: 30%; }
+        100% { left: 110%; top: 10%; }
+    }
+    /* ------------------------------------------------------ */
+
+    .waves-container {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 15vh;
+        min-height: 100px;
+        max-height: 150px;
+        z-index: 6;
+    }
+
+    .parallax-waves > use {
+        animation: move-forever 25s cubic-bezier(.55,.5,.45,.5) infinite;
+    }
+    .parallax-waves > use:nth-child(1) { animation-delay: -2s; animation-duration: 7s; }
+    .parallax-waves > use:nth-child(2) { animation-delay: -3s; animation-duration: 10s; }
+    .parallax-waves > use:nth-child(3) { animation-delay: -4s; animation-duration: 13s; }
+    .parallax-waves > use:nth-child(4) { animation-delay: -5s; animation-duration: 20s; }
+
+    @keyframes move-forever {
+        0% { transform: translate3d(-90px,0,0); }
+        100% { transform: translate3d(85px,0,0); }
+    }
+
+    @keyframes dropIn {
+        from { opacity: 0; transform: translateY(-50px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .btn-glow {
+        background: var(--primary-red);
+        color: white;
+        border: none;
+        padding: 18px 50px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1.2rem;
+        transition: 0.4s;
+    }
+
+    .btn-glow:hover {
+        box-shadow: 0 0 30px var(--primary-red);
+        transform: scale(1.05);
+        color: white;
+    }
+</style>
+
+<div class="hero-container">
+    <img src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=2070" class="hero-video-bg" alt="Background">
+    
+    <div class="hero-overlay">
+        <h1 class="brand-title">ExploreVista</h1>
+        <div class="glass-cta">
+            <h2 class="fw-light mb-3">Your Passport to Unique Stays</h2>
+            <p class="text-white-50 mb-4">Discover, book, and host with confidence on the most trusted travel community.</p>
+            <a href="/listings" class="btn btn-glow">Start Your Adventure</a>
+        </div>
+    </div>
+
+    <div class="airplane-path">
+        <i class="fa-solid fa-plane"></i>
+    </div>
+
+    <svg class="waves-container" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+        <defs>
+            <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+        </defs>
+        <g class="parallax-waves">
+            <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(255,255,255,0.7" />
+            <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(255,255,255,0.5)" />
+            <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(255,255,255,0.3)" />
+            <use xlink:href="#gentle-wave" x="48" y="7" fill="#fff" />
+        </g>
+    </svg>
+</div>
+
+<div class="container py-5 my-5">
+    <div class="row text-center g-4">
+        <div class="col-md-4">
+            <div class="p-4 border rounded-4 shadow-sm h-100 hover-card">
+                <div class="bg-danger-subtle p-3 rounded-circle d-inline-block mb-3">
+                    <i class="fa-solid fa-hotel fa-2x text-danger"></i>
+                </div>
+                <h3>Premium Stays</h3>
+                <p class="text-muted">Explore handpicked listings from Pathankot to around the world.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-4 border rounded-4 shadow-sm h-100 hover-card">
+                <div class="bg-primary-subtle p-3 rounded-circle d-inline-block mb-3">
+                    <i class="fa-solid fa-user-shield fa-2x text-primary"></i>
+                </div>
+                <h3>Safe & Secure</h3>
+                <p class="text-muted">Advanced security with hashed passwords and admin-led moderation.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-4 border rounded-4 shadow-sm h-100 hover-card">
+                <div class="bg-success-subtle p-3 rounded-circle d-inline-block mb-3">
+                    <i class="fa-solid fa-map-location-dot fa-2x text-success"></i>
+                </div>
+                <h3>Live Maps</h3>
+                <p class="text-muted">Interactive Mapbox exploration to visualize your destination.</p>
+            </div>
+        </div>
+    </div>
+</div>

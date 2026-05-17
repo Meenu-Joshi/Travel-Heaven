@@ -62,28 +62,18 @@ module.exports.createNewListing = async (req, res, next) => {
 
 module.exports.showListing = async (req, res) => {
     let { id } = req.params;
-    const listing = await Listing.findById(id)
-        .populate({
-            path: "reviews",
-            populate: {
-                path: "author",
-            },
-        })
-        .populate("owner");
+    const listing = await Listing.findById(id).populate("reviews").populate("owner");
     
     if (!listing) {
-        req.flash("error", "Listing you requested for does not exist!");
+        req.flash("error", "Listing not found!");
         return res.redirect("/listings");
     }
 
-    // Default distance for the calculator
-    const defaultDistance = 500; 
-
+    // Pass the token and the weather key from the .env to the EJS file
     res.render("listing/show.ejs", { 
         listing, 
-        defaultDistance, 
-        calculateFootprint,
-        mapToken: process.env.MAPBOX_TOKEN // Safely passes token to the template
+        mapToken: process.env.MAPBOX_TOKEN,
+        weatherApiKey: process.env.WEATHER_API_KEY 
     });
 };
 
@@ -156,3 +146,4 @@ module.exports.updateListing = async (req, res) => {
     req.flash("success", "Listing Updated!");
     res.redirect(`/listings/${id}`);
 };
+

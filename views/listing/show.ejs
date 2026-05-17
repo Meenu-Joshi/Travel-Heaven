@@ -12,6 +12,7 @@
             <img src="<%=listing.image.url %>" class="card-img-top listing-image" alt="listing-image">
             <div class="card-body">
                 <p class="card-text mt-3"> Created by: <i><%= listing.owner ? listing.owner.username : "System" %></i></p>
+                
                 <p class="card-body"><%=listing.description%> </p>
                 <p class="card-body">  &#8377 <%=listing.price.toLocaleString("en-IN")%></p>
                 <p class="card-body"><%=listing.country%></p>
@@ -132,111 +133,112 @@
     </div>
 
     <script>
-        // 1. Set Access Token using the EJS variable
-        const mapToken = "<%= mapToken %>";
-        mapboxgl.accessToken = mapToken;
+    // 1. Initialize Variables from Controller [cite: 23, 27, 37]
+    const mapToken = "<%= mapToken %>";
+    const weatherKey = "<%= weatherApiKey %>"; 
+    const coordinates = <%- JSON.stringify(listing.geometry.coordinates) %>;
+    
+    mapboxgl.accessToken = mapToken;
 
-        // 2. Safely parse coordinates from EJS to JS
-        const coordinates = <%- JSON.stringify(listing.geometry.coordinates) %>;
+    // 2. Initialize the Map [cite: 24]
+    const map = new mapboxgl.Map({
+        container: 'map', 
+        style: 'mapbox://styles/mapbox/streets-v12', 
+        center: coordinates,
+        zoom: 9
+    });
 
-        // 3. Initialize the static map
-        const map = new mapboxgl.Map({
-            container: 'map', 
-            style: 'mapbox://styles/mapbox/streets-v12', 
-            center: coordinates,
-            zoom: 9
+    // 3. Add Static Destination Marker [cite: 25]
+    new mapboxgl.Marker({ color: "red" })
+        .setLngLat(coordinates)
+        .setPopup(
+            new mapboxgl.Popup({ offset: 25 })
+            .setHTML("<h4><%= listing.title %></h4><p>Destination</p>")
+        )
+        .addTo(map);
+
+    // 4. Live Tracking & Route Function [cite: 28, 31, 32]
+    let directionsLoaded = false;
+    let watchId = null;
+
+    function loadLiveRoute() {
+        if (!mapboxgl.accessToken || mapboxgl.accessToken === "" || mapboxgl.accessToken === "undefined") {
+            console.error("Mapbox Token is missing!");
+            return alert("Error: Mapbox token not configured correctly.");
+        }
+        
+        if (directionsLoaded) return;
+
+        const btn = document.querySelector("button[onclick='loadLiveRoute()']");
+        if (btn) btn.innerText = "Tracking your movement...";
+
+        const directions = new MapboxDirections({
+            accessToken: mapboxgl.accessToken,
+            unit: 'metric',
+            profile: 'mapbox/driving-traffic',
+            controls: { inputs: true, instructions: true }
         });
 
-        // 4. Add the default static marker
-        const marker = new mapboxgl.Marker({ color: "red" })
-            .setLngLat(coordinates)
-            .setPopup(
-                new mapboxgl.Popup({ offset: 25 })
-                .setHTML("<h4><%= listing.title %></h4><p>Exact location provided after booking</p>")
-            )
-            .addTo(map);
+        map.addControl(directions, 'top-left');
+        directions.setDestination(coordinates);
 
-        // 5. Function to load live route
-        let directionsLoaded = false;
+        if (navigator.geolocation) {
+            // watchPosition creates a live link to the user's GPS [cite: 31]
+            watchId = navigator.geolocation.watchPosition(
+                position => {
+                    const userLoc = [position.coords.longitude, position.coords.latitude];
+                    
+                    // Update the route origin in real-time [cite: 32]
+                    directions.setOrigin(userLoc);
+                    
+                    // Move the camera to follow the user [cite: 33]
+                    map.flyTo({
+                        center: userLoc,
+                        speed: 0.8,
+                        essential: true 
+                    });
 
-        function loadLiveRoute() {
-            console.log("Destination Coordinates:", coordinates);
+                    if (btn) btn.innerText = "Live Tracking Active";
+                    directionsLoaded = true;
+                }, 
+                error => {
+                    console.error("Tracking error:", error);
+                    alert("GPS signal lost. Please enable location permissions.");
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        } else {
+            alert("Your browser doesn't support live tracking.");
+        }
+    }
+
+    // 5. Weather Functionality Fix [cite: 37, 38]
+    async function fetchWeather(lat, lon) {
+        if (!weatherKey) return console.error("Weather API key missing");
+        
+        try {
+            const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${weatherKey}`);
+            const data = await response.json();
             
-            if (directionsLoaded) return; 
-
-            const btn = document.querySelector("button[onclick='loadLiveRoute()']");
-            if (btn) btn.innerText = "Finding your location...";
-
-            // Initialize the Directions plugin with the Token
-            const directions = new MapboxDirections({
-                accessToken: mapboxgl.accessToken,
-                unit: 'metric',
-                profile: 'mapbox/driving',
-                controls: { inputs: true, instructions: true }
-            });
-
-            map.addControl(directions, 'top-left');
-            directions.setDestination(coordinates);
-
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    position => {
-                        const userCoordinates = [position.coords.longitude, position.coords.latitude];
-                        console.log("User Coordinates:", userCoordinates);
-                        directions.setOrigin(userCoordinates);
-                        if (btn) btn.innerText = "Route Found!";
-                    }, 
-                    error => {
-                        console.error("Geolocation error:", error);
-                        alert("Location services blocked or unavailable. Please check browser permissions.");
-                        if (btn) btn.innerText = "See Route";
-                    }
-                );
-            } else {
-                alert("Geolocation is not supported by this browser.");
-                if (btn) btn.innerText = "See Route";
+            if (response.ok) {
+                document.getElementById("weather-widget").innerHTML = `
+                    <div class="card-body">
+                        <h5 class="card-title">Weather at Destination</h5>
+                        <p><strong>${data.name}</strong>: ${data.main.temp}°C</p>
+                        <p>Condition: ${data.weather[0].description}</p>
+                    </div>`;
             }
+        } catch (err) { console.error("Weather failed", err); }
+    }
 
-            directionsLoaded = true;
-        }
-
-        // 6. Weather functionality
-        async function fetchWeather(lat, lon) {
-            const apiKey = "<%= process.env.WEATHER_API_KEY %>";
-            try {
-                const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`);
-                const data = await response.json();
-                
-                if (response.ok) {
-                    document.getElementById("weather-widget").innerHTML = `
-                        <div class="card-body">
-                            <h5 class="card-title"><i class="fa-solid fa-cloud-sun"></i> Weather at Destination</h5>
-                            <p class="card-text"><strong>${data.name}, ${data.sys.country}</strong></p>
-                            <p>Temperature: ${data.main.temp}°C</p>
-                            <p>Condition: ${data.weather[0].description}</p>
-                        </div>
-                    `;
-                } else {
-                    document.getElementById("weather-widget").innerHTML = `
-                        <div class="card-body text-danger">
-                            <p>Could not retrieve weather information.</p>
-                        </div>
-                    `;
-                }
-            } catch (err) {
-                console.error("Could not load weather data", err);
-            }
-        }
-
-        // 7. Carbon Footprint
-        function calculateFootprint() {
-            const transport = document.getElementById("transport").value;
-            const baseDistance = 500;
-            const factors = { flight: 0.25, car: 0.15, train: 0.05 };
-            
-            const result = (baseDistance * factors[transport]).toFixed(2);
-            document.getElementById("footprint-result").innerHTML = 
-                `Estimated emissions for a ${baseDistance} km trip: <b>${result} kg CO₂</b>.`;
-        }
-    </script>
+    // 6. Carbon Footprint [cite: 45, 47]
+    function calculateFootprint() {
+        const transport = document.getElementById("transport").value;
+        const dist = 500; 
+        const factors = { flight: 0.25, car: 0.15, train: 0.05 };
+        const result = (dist * factors[transport]).toFixed(2);
+        document.getElementById("footprint-result").innerHTML = 
+            `Estimated emissions for a ${dist} km trip: <b>${result} kg CO₂</b>.`;
+    }
+</script>
 </body>

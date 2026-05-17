@@ -31,10 +31,9 @@
       min-width: 100%;
     }
   }
-  
 </style>
 
-<nav class="navbar navbar-expand-md bg-white sticky-top  border-bottom">
+<nav class="navbar navbar-expand-md bg-white sticky-top border-bottom">
     <div class="container-fluid">
       <a class="navbar-brand" href="/listings"><i class="fa-solid fa-compass"></i></a>
     
@@ -47,30 +46,33 @@
           <a class="nav-link" href="/listings">Explore</a>
         </div>
 
-       <div class="navbar-nav mx-auto">
-    <form class="d-flex" role="search" action="/listings/search" method="GET">
-        <input name="q" class="form-control me-2 search-inp" type="search" placeholder="Search Destination" style="border-radius: 25px; min-width: 250px;">
-        <button class="btn search-btn" type="submit" style="background-color: #fe424d; color: white; border-radius: 25px;">Search</button>
-    </form>
-</div>
-        <div class="navbar-nav ms-auto">
-    <a class="nav-link" href="/listings/new">Airbnb your Home</a>
-    
-    <% if (!currUser) { %>
-        <a class="nav-link" href="/signup"><b>Signup</b></a>
-        <a class="nav-link" href="/login"><b>Login</b></a>
-    <% } else { %>
-        <% if (currUser.isAdmin) { %>
-            <a class="nav-link btn btn-outline-warning text-dark me-2" href="/admin/dashboard">
-                <i class="fa-solid fa-user-shield"></i> Admin Panel
-            </a>
+        <% if (currUser) { %>
+          <div class="navbar-nav mx-auto">
+            <form class="d-flex" role="search" action="/listings/search" method="GET">
+                <input name="q" class="form-control me-2 search-inp" type="search" placeholder="Search Destination">
+                <button class="btn search-btn" type="submit">Search</button>
+            </form>
+          </div>
         <% } %>
 
-        <a class="nav-link" href="/logout"><b>Logout</b></a>
-    <% } %>
-</div>
+        <div class="navbar-nav ms-auto">
+          <% if (currUser) { %>
+            <a class="nav-link" href="/listings/new">Airbnb your Home</a>
+          <% } %>
+          
+          <% if (!currUser) { %>
+              <a class="nav-link" href="/signup"><b>Signup</b></a>
+              <a class="nav-link" href="/login"><b>Login</b></a>
+          <% } else { %>
+              <% if (currUser.isAdmin) { %>
+                  <a class="nav-link btn btn-outline-warning text-dark me-2" href="/admin/dashboard">
+                      <i class="fa-solid fa-user-shield"></i> Admin Panel
+                  </a>
+              <% } %>
+
+              <a class="nav-link" href="/logout"><b>Logout</b></a>
+          <% } %>
+        </div>
       </div>
     </div>
 </nav>
-
-
