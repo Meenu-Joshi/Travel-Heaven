@@ -4,103 +4,81 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WanderLust</title>
+    
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/rating.css">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
-   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
-   <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css" rel="stylesheet">
-<script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js"></script>
-   <link rel="stylesheet" href="/css/rating.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2=family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+    
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js"></script>
+    
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.js"></script>
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.css" type="text/css" />
 </head>
 <body>
    
-    <%-include("../includes/navbar.ejs")%>
-   
+    <%- include("../includes/navbar.ejs") %>
 
     <div class="container">
-        <%-include("../includes/flash.ejs")%>
-                <%- body -%>
+        <%- include("../includes/flash.ejs") %>
+        <%- body -%>
     </div>
-    <%-include("../includes/footer.ejs") %>
+
+    <%- include("../includes/footer.ejs") %>
    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-   <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.js"></script>
-<link href="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.css" rel="stylesheet" />
 
-<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.js"></script>
-<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.css" type="text/css" />
-   <div id="chat-container">
-    <button type="button" id="chat-toggle" class="btn btn-danger rounded-circle shadow-lg">💬</button>
     
-    <div id="chat-box" class="card shadow-lg d-none">
-        
-        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
-            <span class="fw-bold"><i class="fa-solid fa-compass me-1"></i> ExploreVista AI</span>
-            <button id="new-chat-btn" class="btn btn-sm btn-outline-light"><i class="fa-solid fa-plus"></i> New Chat</button>
-        </div>
-        
-        <div id="chat-main-body" class="d-flex flex-grow-1 overflow-hidden">
-            
-            <div id="chat-sidebar" class="bg-light border-end overflow-auto p-2 d-none d-sm-block">
-                <div class="text-muted fw-bold mb-2 border-bottom pb-1" style="font-size: 0.75rem;">PAST CHATS</div>
-                <div id="history-list" class="list-group list-group-flush"></div>
-            </div>
-            
-            <div id="chat-messages" class="card-body overflow-auto p-3 flex-grow-1"></div>
-        </div>
-        
-        <div class="card-footer bg-white border-top">
-            <div class="input-group input-group-sm">
-                <input type="text" id="user-input" class="form-control" placeholder="Ask me about this site...">
-                <button id="send-btn" class="btn btn-danger">Send</button>
+
+    <div class="modal fade" id="supportModal" tabindex="-1" aria-labelledby="supportModalLabel" aria-hidden="true" style="color: #333;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title fw-bold" id="supportModalLabel">
+                        <i class="fa-solid fa-circle-info text-danger"></i> Urgent Support Desk
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-shadow="none" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-start px-4">
+                    <p class="text-muted">Need immediate assistance with a destination reservation, hosting settings, or account access? Connect directly with our administration team:</p>
+                    
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-danger-subtle p-2 rounded-circle me-3 text-danger" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fa-solid fa-envelope-open-text"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Admin Email</small>
+                            <strong>admin@explorevista.com</strong>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-success-subtle p-2 rounded-circle me-3 text-success" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fa-solid fa-phone"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Support Hotline</small>
+                            <strong>+91 98765-XXXXX</strong>
+                        </div>
+                    </div>
+
+                    <div class="bg-light p-3 rounded-3 text-muted small">
+                        <i class="fa-solid fa-clock"></i> Escalations are monitored within standard operational timelines (9:00 AM - 6:00 PM IST).
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-secondary rounded-5 px-4" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-<div class="modal fade" id="supportModal" tabindex="-1" aria-labelledby="supportModalLabel" aria-hidden="true" style="color: #333;">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-4 border-0 shadow">
-      <div class="modal-header border-bottom-0">
-        <h5 class="modal-title fw-bold" id="supportModalLabel">
-            <i class="fa-solid fa-circle-info text-danger"></i> Urgent Support Desk
-        </h5>
-        <button type="button" class="btn-close" data-bs-shadow="none" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body text-start px-4">
-        <p class="text-muted">Need immediate assistance with a destination reservation, hosting settings, or account access? Connect directly with our administration team:</p>
-        
-        <div class="d-flex align-items-center mb-3">
-            <div class="bg-danger-subtle p-2 rounded-circle me-3 text-danger" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                <i class="fa-solid fa-envelope-open-text"></i>
-            </div>
-            <div>
-                <small class="text-muted d-block">Admin Email</small>
-                <strong>admin@explorevista.com</strong>
-            </div>
-        </div>
 
-        <div class="d-flex align-items-center mb-3">
-            <div class="bg-success-subtle p-2 rounded-circle me-3 text-success" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                <i class="fa-solid fa-phone"></i>
-            </div>
-            <div>
-                <small class="text-muted d-block">Support Hotline</small>
-                <strong>+91 98765-XXXXX</strong>
-            </div>
-        </div>
-
-        <div class="bg-light p-3 rounded-3 text-muted small">
-            <i class="fa-solid fa-clock"></i> Escalations are monitored within standard operational timelines (9:00 AM - 6:00 PM IST).
-        </div>
-      </div>
-      <div class="modal-footer border-top-0">
-        <button type="button" class="btn btn-secondary rounded-5 px-4" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
- <script src="/js/script.js"></script>
+    <script src="/js/script.js"></script>
 </body>
 </html>

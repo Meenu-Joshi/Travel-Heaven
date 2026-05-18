@@ -206,17 +206,17 @@ div svg{
         right: 0;
     }
 }
-/* --- RESPONSIVE CHATBOT MECHANICS --- */
+/* --- UNIFIED RESPONSIVE OVERLAY CHATBOT --- */
 
-/* Keeps the entire widget locked in place over maps/footers */
+/* Root Wrapper Layout */
 #chat-container {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 2500; 
+    bottom: 24px;
+    right: 24px;
+    z-index: 2500; /* Keeps the entire widget locked safely on top of maps/footers */
 }
 
-/* Floating Toggle Action Button */
+/* Floating Action Trigger Button */
 #chat-toggle {
     width: 60px;
     height: 60px;
@@ -224,40 +224,62 @@ div svg{
     align-items: center;
     justify-content: center;
     font-size: 1.5rem;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Base Desktop View Rules (Screens wider than 576px) */
+#chat-toggle:hover {
+    transform: scale(1.08);
+}
+
+/* Desktop Chat Box Styling (Screens wider than 576px) */
 #chat-box {
-    position: absolute;
-    bottom: 75px;
-    right: 0;
-    width: 460px;
+    position: fixed; /* Fixed relative to the viewport window */
+    bottom: 95px;    /* Floats cleanly right above the circular chat toggle */
+    right: 24px;     /* Aligns perfectly to the right side of the screen */
+    width: 440px;
     height: 500px;
-    background-color: #ffffff;
-    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 16px !important;
     overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
 /* Dynamic height control for internal rows */
 #chat-main-body {
     height: calc(100% - 110px);
+    display: flex;
+    flex-grow: 1;
+    overflow: hidden;
 }
 
 #chat-sidebar {
     width: 140px;
 }
 
+/* Internal message display viewport */
 #chat-messages {
-    background-color: #fafafa;
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
 }
 
-/* --- MOBILE BREAKPOINT MEDIA QUERY (Screens 576px or smaller) --- */
+/* Force word wrapping so long inputs don't overflow the chat bubbles */
+#chat-messages div {
+    max-width: 85%;
+    word-break: break-word;
+}
+
+/* --- MOBILE SCREEN ADAPTATION (Phones, 576px or less) --- */
 @media (max-width: 576px) {
     #chat-container {
         bottom: 0;
         right: 0;
     }
-
+    
     /* Transform the chat box into a full mobile screen overlay app window */
     #chat-box {
         position: fixed;
@@ -267,10 +289,10 @@ div svg{
         bottom: 0;
         width: 100vw;
         height: 100vh;
-        border-radius: 0; /* Strips rounded edges for native phone app feel */
+        border-radius: 0px !important; /* Strips rounded corners on mobile */
     }
 
     #chat-main-body {
-        height: calc(100% - 110px); /* Re-calculates height constraints inside mobile viewport */
+        height: calc(100% - 110px); /* Re-calculates heights inside mobile viewport */
     }
 }
