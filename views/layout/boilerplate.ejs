@@ -31,26 +31,24 @@
 
 <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.js"></script>
 <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.css" type="text/css" />
-   <div id="chat-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
-    <button type="button" id="chat-toggle" class="btn btn-danger rounded-circle p-3 shadow-lg">💬</button>
+   <div id="chat-container">
+    <button type="button" id="chat-toggle" class="btn btn-danger rounded-circle shadow-lg">💬</button>
     
-    <div id="chat-box" class="card shadow-lg d-none" style="width: 480px; height: 450px; display: flex; flex-direction: column;">
+    <div id="chat-box" class="card shadow-lg d-none">
         
         <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
             <span class="fw-bold"><i class="fa-solid fa-compass me-1"></i> ExploreVista AI</span>
             <button id="new-chat-btn" class="btn btn-sm btn-outline-light"><i class="fa-solid fa-plus"></i> New Chat</button>
         </div>
         
-        <div class="d-flex flex-grow-1 overflow-hidden" style="height: calc(100% - 110px);">
+        <div id="chat-main-body" class="d-flex flex-grow-1 overflow-hidden">
             
-            <div id="chat-sidebar" class="bg-light border-end overflow-auto p-2" style="width: 140px; font-size: 0.8rem;">
+            <div id="chat-sidebar" class="bg-light border-end overflow-auto p-2 d-none d-sm-block">
                 <div class="text-muted fw-bold mb-2 border-bottom pb-1" style="font-size: 0.75rem;">PAST CHATS</div>
-                <div id="history-list" class="list-group list-group-flush">
-                    </div>
+                <div id="history-list" class="list-group list-group-flush"></div>
             </div>
             
-            <div id="chat-messages" class="card-body overflow-auto p-3 flex-grow-1" style="background-color: #fafafa;">
-                </div>
+            <div id="chat-messages" class="card-body overflow-auto p-3 flex-grow-1"></div>
         </div>
         
         <div class="card-footer bg-white border-top">

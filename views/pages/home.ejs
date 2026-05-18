@@ -5,6 +5,11 @@
         --glass: rgba(255, 255, 255, 0.15);
     }
 
+    body {
+        overflow-x: hidden; /* Crucial to prevent horizontal scrolling on mobile */
+    }
+
+    /* Responsive Hero Wrapper */
     .hero-container {
         position: relative;
         height: 100vh;
@@ -25,7 +30,7 @@
 
     @keyframes slowZoom {
         from { transform: scale(1); }
-        to { transform: scale(1.15); }
+        to { transform: scale(1.1); }
     }
 
     .hero-overlay {
@@ -38,73 +43,56 @@
         align-items: center;
         text-align: center;
         color: white;
-        padding: 0 20px;
+        padding: 0 15px; /* Better padding for mobile screens */
     }
 
+    /* Mobile-responsive fluid typography */
     .brand-title {
-        font-size: clamp(3rem, 10vw, 7rem);
+        font-size: clamp(2.5rem, 8vw, 6.5rem);
         font-weight: 900;
         text-transform: uppercase;
-        letter-spacing: 5px;
+        letter-spacing: 3px;
         margin-bottom: 10px;
         text-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        animation: dropIn 1s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
+    /* Responsive Glass Card */
     .glass-cta {
         background: var(--glass);
         backdrop-filter: blur(15px);
         -webkit-backdrop-filter: blur(15px);
         border: 1px solid rgba(255,255,255,0.2);
-        padding: 40px;
-        border-radius: 30px;
+        padding: 30px 20px;
+        border-radius: 24px;
         box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-        transition: transform 0.4s ease;
+        max-width: 600px;
+        width: 100%;
     }
 
-    .glass-cta:hover {
-        transform: translateY(-10px);
-        border-color: var(--primary-red);
-    }
-
-    /* --- NEW: THE ANIMATED AIRPLANE --- */
+    /* Responsive Airplane Path */
     .airplane-path {
         position: absolute;
-        top: 20%;
-        left: -10%;
+        top: 25%;
+        left: -15%;
         z-index: 5;
-        font-size: 3rem;
+        font-size: clamp(2rem, 5vw, 3.5rem); /* Scales down on mobile */
         color: rgba(255,255,255,0.8);
-        filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
-        animation: flyAcross 15s linear infinite;
+        animation: flyAcross 18s linear infinite;
         transform: rotate(15deg);
     }
 
-    /* Subtle trail behind the plane */
-    .airplane-path::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        right: 100%;
-        width: 200px;
-        height: 2px;
-        background: linear-gradient(to left, rgba(255,255,255,0.8), transparent);
-        transform: translateY(-50%);
-    }
-
     @keyframes flyAcross {
-        0% { left: -10%; top: 30%; }
-        100% { left: 110%; top: 10%; }
+        0% { left: -15%; top: 35%; }
+        100% { left: 115%; top: 15%; }
     }
-    /* ------------------------------------------------------ */
 
+    /* Layered Responsive Waves */
     .waves-container {
         position: absolute;
         bottom: 0;
         width: 100%;
-        height: 15vh;
-        min-height: 100px;
-        max-height: 150px;
+        height: 10vh; /* Scaled dynamically with viewport height */
+        min-height: 60px;
         z-index: 6;
     }
 
@@ -121,26 +109,146 @@
         100% { transform: translate3d(85px,0,0); }
     }
 
-    @keyframes dropIn {
-        from { opacity: 0; transform: translateY(-50px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
     .btn-glow {
         background: var(--primary-red);
         color: white;
         border: none;
-        padding: 18px 50px;
+        padding: 14px 35px;
         border-radius: 50px;
         font-weight: 700;
-        font-size: 1.2rem;
-        transition: 0.4s;
+        font-size: 1rem;
+        transition: 0.3s ease;
+        width: 100%; /* Full-width buttons look cleaner on mobile stacked grids */
+        max-width: 250px;
     }
 
     .btn-glow:hover {
-        box-shadow: 0 0 30px var(--primary-red);
-        transform: scale(1.05);
+        box-shadow: 0 0 25px var(--primary-red);
+        transform: scale(1.03);
         color: white;
+    }
+
+    /* --- MOBILE-FRIENDLY FLOATING CHATBOT WIDGET --- */
+    #chatbot-widget {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        z-index: 1000;
+        font-family: inherit;
+    }
+
+    .chat-btn {
+        width: 60px;
+        height: 60px;
+        border-radius: 50px;
+        background: var(--primary-red);
+        color: white;
+        border: none;
+        box-shadow: 0 8px 24px rgba(254, 66, 77, 0.4);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .chat-btn:hover {
+        transform: scale(1.05);
+    }
+
+    .chat-window {
+        position: absolute;
+        bottom: 75px;
+        right: 0;
+        width: 350px;
+        height: 450px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        display: none; /* Hidden by default */
+        flex-direction: column;
+        overflow: hidden;
+        border: 1px solid #eee;
+    }
+
+    .chat-header {
+        background: var(--primary-red);
+        color: white;
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+    }
+
+    .chat-body {
+        flex-grow: 1;
+        padding: 15px;
+        overflow-y: auto;
+        background: #f8f9fa;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .chat-msg {
+        max-width: 80%;
+        padding: 10px 14px;
+        border-radius: 15px;
+        font-size: 0.9rem;
+    }
+
+    .chat-msg.bot {
+        background: white;
+        align-self: flex-start;
+        border-bottom-left-radius: 2px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .chat-msg.user {
+        background: var(--primary-red);
+        color: white;
+        align-self: flex-end;
+        border-bottom-right-radius: 2px;
+    }
+
+    .chat-footer {
+        padding: 10px;
+        background: white;
+        border-top: 1px solid #eee;
+        display: flex;
+        gap: 8px;
+    }
+
+    .chat-footer input {
+        flex-grow: 1;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        padding: 8px 15px;
+        outline: none;
+    }
+
+    /* Media Queries for fine-tuning phone responsive UI */
+    @media (max-width: 576px) {
+        .glass-cta {
+            padding: 25px 15px;
+        }
+        .brand-title {
+            letter-spacing: 1px;
+        }
+        .chat-window {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 100vw;
+            height: 100vh;
+            border-radius: 0;
+            z-index: 1001;
+        }
+        .chat-window.active {
+            display: flex;
+        }
     }
 </style>
 
@@ -150,9 +258,9 @@
     <div class="hero-overlay">
         <h1 class="brand-title">ExploreVista</h1>
         <div class="glass-cta">
-            <h2 class="fw-light mb-3">Your Passport to Unique Stays</h2>
-            <p class="text-white-50 mb-4">Discover, book, and host with confidence on the most trusted travel community.</p>
-            <a href="/listings" class="btn btn-glow">Start Your Adventure</a>
+            <h2 class="fs-4 fw-light mb-3">Your Passport to Unique Stays</h2>
+            <p class="text-white-50 small mb-4">Discover, book, and host with confidence on the most trusted travel community.</p>
+            <a href="/listings" class="btn btn-glow">Start Adventure</a>
         </div>
     </div>
 
@@ -174,10 +282,10 @@
     </svg>
 </div>
 
-<div class="container py-5 my-5">
+<div class="container py-5 my-3">
     <div class="row text-center g-4">
-        <div class="col-md-4">
-            <div class="p-4 border rounded-4 shadow-sm h-100 hover-card">
+        <div class="col-12 col-md-4">
+            <div class="p-4 border rounded-4 shadow-sm h-100">
                 <div class="bg-danger-subtle p-3 rounded-circle d-inline-block mb-3">
                     <i class="fa-solid fa-hotel fa-2x text-danger"></i>
                 </div>
@@ -185,8 +293,8 @@
                 <p class="text-muted">Explore handpicked listings from Pathankot to around the world.</p>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="p-4 border rounded-4 shadow-sm h-100 hover-card">
+        <div class="col-12 col-md-4">
+            <div class="p-4 border rounded-4 shadow-sm h-100">
                 <div class="bg-primary-subtle p-3 rounded-circle d-inline-block mb-3">
                     <i class="fa-solid fa-user-shield fa-2x text-primary"></i>
                 </div>
@@ -194,8 +302,8 @@
                 <p class="text-muted">Advanced security with hashed passwords and admin-led moderation.</p>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="p-4 border rounded-4 shadow-sm h-100 hover-card">
+        <div class="col-12 col-md-4">
+            <div class="p-4 border rounded-4 shadow-sm h-100">
                 <div class="bg-success-subtle p-3 rounded-circle d-inline-block mb-3">
                     <i class="fa-solid fa-map-location-dot fa-2x text-success"></i>
                 </div>
@@ -205,3 +313,68 @@
         </div>
     </div>
 </div>
+
+<div id="chatbot-widget">
+    <button class="chat-btn" onclick="toggleChat()"><i class="fa-solid fa-comment-dots"></i></button>
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <span><i class="fa-solid fa-robot"></i> VistaBot Help</span>
+            <button class="btn btn-sm text-white border-0" onclick="toggleChat()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="chat-msg bot">Hello! Welcome to ExploreVista support. How can I assist you with your destination lookup or account setting today?</div>
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="chatInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+            <button class="btn btn-danger btn-sm rounded-circle" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleChat() {
+        const win = document.getElementById('chatWindow');
+        if (win.style.display === 'flex') {
+            win.style.display = 'none';
+        } else {
+            win.style.display = 'flex';
+            // Scroll to bottom
+            const body = document.getElementById('chatBody');
+            body.scrollTop = body.scrollHeight;
+        }
+    }
+
+    function handleKeyPress(e) {
+        if (e.key === 'Enter') sendMessage();
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('chatInput');
+        const body = document.getElementById('chatBody');
+        const text = input.value.trim();
+        
+        if (!text) return;
+
+        // Render User Message
+        body.innerHTML += `<div class="chat-msg user">${text}</div>`;
+        input.value = '';
+        body.scrollTop = body.scrollHeight;
+
+        // Dynamic Automated Responses
+        setTimeout(() => {
+            let botReply = "I'm sorry, I didn't quite catch that. You can type 'admin', 'listings', or 'password' for contextual help.";
+            const lowerText = text.toLowerCase();
+
+            if (lowerText.includes('admin') || lowerText.includes('contact')) {
+                botReply = "You can contact our support admins instantly via email at <strong>admin@explorevista.com</strong>.";
+            } else if (lowerText.includes('listing') || lowerText.includes('book')) {
+                botReply = "To look at properties, exit to the main page and hit the 'Start Adventure' or 'Explore' button in the navbar!";
+            } else if (lowerText.includes('password') || lowerText.includes('reset')) {
+                botReply = "If your password reset token is expired, go back to the login page and trigger a fresh link via 'Forgot Password'.";
+            }
+
+            body.innerHTML += `<div class="chat-msg bot">${botReply}</div>`;
+            body.scrollTop = body.scrollHeight;
+        }, 800);
+    }
+</script>
