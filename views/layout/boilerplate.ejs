@@ -20,7 +20,32 @@
     
     <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.js"></script>
     <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.css" type="text/css" />
+
+    
 </head>
+<style>
+    .forgot-password-btn {
+        color: #7d746c;
+        background-color: transparent;
+        border: 1px solid #ced4da;
+        border-radius: 50px;
+        padding: 6px 16px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .forgot-password-btn:hover {
+        color: #ffffff;
+        background-color: #fe424d; /* Changes to ExploreVista Red on hover */
+        border-color: #fe424d;
+        box-shadow: 0 4px 12px rgba(254, 66, 77, 0.25);
+        transform: translateY(-1px);
+    }
+</style>
+
 <body>
    
     <%- include("../includes/navbar.ejs") %>
@@ -34,51 +59,36 @@
    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
+    <div id="chat-container">
+    <button type="button" id="chat-toggle" class="btn btn-danger rounded-circle shadow-lg">💬</button>
     
+    <div id="chat-box" class="card shadow-lg d-none" style="width: 350px; position: fixed; bottom: 80px; right: 20px; z-index: 1000;">
+        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+            <span class="fw-bold"><i class="fa-solid fa-compass me-1"></i> ExploreVista AI</span>
+            <div class="d-flex gap-1">
+                <button id="new-chat-btn" class="btn btn-sm btn-outline-light"><i class="fa-solid fa-plus"></i> New Chat</button>
+                <button id="chat-close-btn" class="btn btn-sm btn-outline-light"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
 
-    <div class="modal fade" id="supportModal" tabindex="-1" aria-labelledby="supportModalLabel" aria-hidden="true" style="color: #333;">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header border-bottom-0">
-                    <h5 class="modal-title fw-bold" id="supportModalLabel">
-                        <i class="fa-solid fa-circle-info text-danger"></i> Urgent Support Desk
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-shadow="none" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-start px-4">
-                    <p class="text-muted">Need immediate assistance with a destination reservation, hosting settings, or account access? Connect directly with our administration team:</p>
-                    
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-danger-subtle p-2 rounded-circle me-3 text-danger" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fa-solid fa-envelope-open-text"></i>
-                        </div>
-                        <div>
-                            <small class="text-muted d-block">Admin Email</small>
-                            <strong>admin@explorevista.com</strong>
-                        </div>
-                    </div>
+        <div class="d-flex" style="height: 350px;">
+            <div id="history-list" class="list-group list-group-flush border-end overflow-auto d-none d-md-block" style="width: 100px;"></div>
+            
+            <div id="chat-messages" class="card-body overflow-auto p-3 flex-grow-1" style="height: 100%;"></div>
+        </div>
 
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-success-subtle p-2 rounded-circle me-3 text-success" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fa-solid fa-phone"></i>
-                        </div>
-                        <div>
-                            <small class="text-muted d-block">Support Hotline</small>
-                            <strong>+91 98765-XXXXX</strong>
-                        </div>
-                    </div>
-
-                    <div class="bg-light p-3 rounded-3 text-muted small">
-                        <i class="fa-solid fa-clock"></i> Escalations are monitored within standard operational timelines (9:00 AM - 6:00 PM IST).
-                    </div>
-                </div>
-                <div class="modal-footer border-top-0">
-                    <button type="button" class="btn btn-secondary rounded-5 px-4" data-bs-dismiss="modal">Close</button>
-                </div>
+        <div class="card-footer bg-white border-top">
+            <div class="input-group">
+                <input type="text" id="user-input" class="form-control" placeholder="Ask something...">
+                <button type="button" id="send-btn" class="btn btn-danger">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
             </div>
         </div>
     </div>
+</div>
 
     <script src="/js/script.js"></script>
+    
 </body>
 </html>

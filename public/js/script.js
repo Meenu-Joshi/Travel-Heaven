@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const chatMessages = document.getElementById("chat-messages");
     const newChatBtn = document.getElementById("new-chat-btn");
     const historyList = document.getElementById("history-list");
+    const chatCloseBtn = document.getElementById("chat-close-btn");
 
     // Client-side local memory state tracking variables
     let clientSessions = JSON.parse(localStorage.getItem("explorevista_chats")) || {};
@@ -120,12 +121,22 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("explorevista_chats", JSON.stringify(clientSessions));
     }
 
-    // Event binding initializations
+    // --- EVENT BINDING INITIALIZATIONS ---
     if (newChatBtn) newChatBtn.addEventListener("click", startNewChat);
     if (sendBtn) sendBtn.addEventListener("click", handleMessageDispatch);
     if (userInput) {
         userInput.addEventListener("keypress", (e) => {
             if (e.key === "Enter") handleMessageDispatch();
+        });
+    }
+
+    // Explicit mobile close button logic (Safely wrapped inside scope)
+    if (chatCloseBtn) {
+        chatCloseBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (chatBox) {
+                chatBox.classList.add("d-none");
+            }
         });
     }
 
@@ -139,3 +150,27 @@ document.addEventListener("DOMContentLoaded", () => {
         switchActiveChat(activeChatId);
     }
 });
+
+    document.addEventListener("DOMContentLoaded", () => {
+        // Configuration options for the observer
+        const observerOptions = {
+            root: null, // Uses the browser viewport
+            rootMargin: "0px",
+            threshold: 0.15 // Triggers when 15% of the element is visible
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                // Check if the element has entered the viewport
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("active");
+                    // Stop observing once animated to keep performance optimal
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        // Target all elements with the reveal class and track them
+        const hiddenElements = document.querySelectorAll(".reveal-on-scroll");
+        hiddenElements.forEach(el => observer.observe(el));
+    });

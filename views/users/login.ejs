@@ -1,5 +1,6 @@
 <% layout('layout/boilerplate') -%>
-<h2 class="offset-3">Login</h2>
+
+<h2 class="offset-3 mt-3">Login</h2>
 <div class="row mt-3 offset-3">
     <form action="/login" method="POST" novalidate class="needs-validation">
     <div class="col mb-3 col-6">
@@ -11,7 +12,9 @@
         <div class="mb-3">
             <label  for="password" class="form-label">Password</label>
             <input type="password" class="form-control" name="password" id="password" placeholder="abc@123%4" required/>
-            <a href="/forgot" class="d-block mt-2">Forgot Password?</a>
+            <a href="/forgot" class="forgot-password-btn btn btn-outline-secondary btn-sm rounded-pill px-3 mt-3">
+            <i class="fa-solid fa-key me-1"></i> Forgot Password?
+        </a>
          </div>
     </div>
     <button class="btn btn-success">Login</button>

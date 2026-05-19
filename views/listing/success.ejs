@@ -1,21 +1,33 @@
 <% layout('layout/boilerplate') -%>
-<div class="row mt-3">
-    <div class="col-6 offset-3 text-center">
-        <div class="alert alert-success p-5 shadow">
-            <i class="fa-solid fa-circle-check fa-4x mb-3 text-success"></i>
-            <h2 class="mt-3">Your Booking is Done!</h2>
+
+<div class="container my-5">
+    <div class="row justify-content-center px-3">
+        <div class="col-12 col-sm-8 col-md-5 bg-success-subtle border border-success-subtle text-center p-4 p-sm-5 rounded-4 shadow-sm">
             
-            <% if (successMsg && successMsg.length) { %>
-                <p class="lead"><%= successMsg %></p>
-            <% } else { %>
-                <p class="lead">Your stay has been successfully reserved.</p>
-            <% } %>
-            
-            <hr>
-            <div class="d-grid gap-2">
-                <a href="/listings" class="btn btn-primary">Back to Destinations</a>
-                <button class="btn btn-outline-dark" onclick="window.print()">Print Receipt</button>
+            <div class="d-flex justify-content-center mb-4">
+                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 70px; height: 70px;">
+                    <i class="fa-solid fa-check fs-2"></i>
+                </div>
             </div>
+
+            <h2 class="fw-bold text-success-emphasis mb-2" style="font-size: calc(1.3rem + 0.6vw);">
+                Your Booking is Done!
+            </h2>
+            <p class="text-muted mb-4 px-2" style="font-size: 0.95rem; line-height: 1.5;">
+                Payment Successful! Your stay is confirmed.
+            </p>
+
+            <hr class="text-success-emphasis opacity-25 my-4">
+
+            <div class="d-grid gap-3 max-width-buttons mx-auto" style="max-width: 280px;">
+                <a href="/listings" class="btn btn-primary fw-semibold py-25 rounded-3 shadow-sm transition-all">
+                    <i class="fa-solid fa-arrow-left me-2"></i>Back to Destinations
+                </a>
+                <button onclick="window.print()" class="btn btn-outline-dark fw-semibold py-25 rounded-3 transition-all">
+                    <i class="fa-solid fa-print me-2"></i>Print Receipt
+                </button>
+            </div>
+
         </div>
     </div>
 </div>

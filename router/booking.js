@@ -41,17 +41,39 @@ router.get("/book", isLoggedIn, async (req, res) => {
 });
 
 // 2. POST: Create Razorpay Order
+
 router.post("/confirm", isLoggedIn, async (req, res) => {
     try {
-        let { id } = req.params;
+        const { id } = req.params; // Inherited from app.js perfectly
+        
+        // Ensure request body structures exist safely
+        if (!req.body.booking) {
+            req.flash("error", "Invalid form data submission.");
+            return res.redirect("back");
+        }
+
         let { checkIn, checkOut, guests } = req.body.booking;
+        
         const listing = await Listing.findById(id);
+        if (!listing) {
+            req.flash("error", "Destination listing not found.");
+            return res.redirect("/listings");
+        }
+
+        // Parse and validate dates
+        const checkInDate = new Date(checkIn);
+        const checkOutDate = new Date(checkOut);
+
+        if (isNaN(checkInDate.getTime()) || isNaN(checkOutDate.getTime())) {
+            req.flash("error", "Please provide valid booking dates.");
+            return res.redirect("back");
+        }
 
         // Date conflict check logic
         const conflict = await Booking.findOne({
             listing: id,
             $or: [
-                { checkIn: { $lt: new Date(checkOut) }, checkOut: { $gt: new Date(checkIn) } }
+                { checkIn: { $lt: checkOutDate }, checkOut: { $gt: checkInDate } }
             ]
         });
 
@@ -60,13 +82,26 @@ router.post("/confirm", isLoggedIn, async (req, res) => {
             return res.redirect(`/listings/${id}`);
         }
 
-        // --- FIXED: Define amount BEFORE using it in razorpay order ---
-        const days = (new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24);
-        const amount = Math.round((days * listing.price) * 100); 
+        // Calculate days safely
+        const timeDiff = checkOutDate.getTime() - checkInDate.getTime();
+        const days = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+        
+        if (days <= 0) {
+            req.flash("error", "Check-out date must be after the check-in date.");
+            return res.redirect("back");
+        }
+
+        // Calculate amount in paise
+        const amount = Math.round(days * listing.price * 100); 
+
+        if (isNaN(amount) || amount <= 0) {
+            req.flash("error", "Invalid total payment calculation.");
+            return res.redirect("back");
+        }
 
         const razorpay = getRazorpayInstance();
         const order = await razorpay.orders.create({
-            amount: amount, // amount is now properly defined here
+            amount: amount, 
             currency: "INR",
             receipt: `rcpt_${id.toString().slice(-15)}`
         });
@@ -75,9 +110,9 @@ router.post("/confirm", isLoggedIn, async (req, res) => {
         const newBooking = new Booking({
             listing: id,
             guest: req.user._id,
-            checkIn,
-            checkOut,
-            guests, // Included to fix validation error
+            checkIn: checkInDate,
+            checkOut: checkOutDate,
+            guests: Number(guests) || 1, 
             totalPrice: (amount / 100),
             razorpay_order_id: order.id,
             status: "Pending"
@@ -95,12 +130,13 @@ router.post("/confirm", isLoggedIn, async (req, res) => {
         });
 
     } catch (err) {
-        console.error("Razorpay Error:", err);
+        // This will now catch any unexpected exceptions reliably
+        console.log("CRITICAL ERROR IN ROUTE:");
+        console.error(err);
         req.flash("error", "Something went wrong with the payment setup.");
         res.redirect("back");
     }
 });
-
 // 3. POST: Verify Payment and Update Status
 router.post("/verify-payment", isLoggedIn, async (req, res) => {
     try {

@@ -1,4 +1,17 @@
 /* style.css */
+/* The initial hidden state of the element */
+.reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    will-change: opacity, transform;
+}
+
+/* The state applied via JavaScript when scrolled into view */
+.reveal-on-scroll.active {
+    opacity: 1;
+    transform: translateY(0);
+}
 body {
     font-family: "Plus Jakarta Sans", sans-serif !important;
     display: flex;
@@ -294,5 +307,29 @@ div svg{
 
     #chat-main-body {
         height: calc(100% - 110px); /* Re-calculates heights inside mobile viewport */
+    }
+}
+/* By default, hide the close button on desktop layouts */
+#chat-close-btn {
+    display: none;
+}
+
+/* Inside your existing mobile media query breakpoint */
+@media (max-width: 576px) {
+    #chat-box {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0px !important;
+        z-index: 2600; /* Ensure it stays cleanly over everything else */
+    }
+
+    /* Unhide the header close button on mobile platforms */
+    #chat-close-btn {
+        display: inline-block;
     }
 }

@@ -96,8 +96,8 @@
             }
         },
         "prefill": {
-            "name": "<%= currUser.username %>",
-            "email": "<%= currUser.email %>"
+            "name": "<%= currUser ? currUser.username : '' %>",
+            "email": "<%= (currUser && currUser.email) ? currUser.email : '' %>"
         },
         "theme": { "color": "#fe424d" }
     };

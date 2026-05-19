@@ -1,85 +1,117 @@
 <% layout('layout/boilerplate') -%>
-<body>
-    <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.css" rel="stylesheet" />
-    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.js"></script>
+<style>
+    body {
+        overflow-x: hidden;
+    }
+    .listing-card img {
+        height: 50vh;
+        object-fit: cover;
+        border-radius: 15px;
+    }
+    .starability-slot {
+        min-height: 40px;
+    }
+    /* Responsive Map Height adjustments */
+    #map {
+        height: 400px;
+        width: 100%;
+        border-radius: 15px;
+    }
+    @media (max-width: 576px) {
+        .listing-card img {
+            height: 35vh;
+        }
+        #map {
+            height: 280px;
+        }
+    }
+</style>
 
-    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.css" type="text/css">
-    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.js"></script>
-
-    <div class="row col-8 offset-1">
-        <h3 class="mt-3"> <b><%=listing.title%></b></h3>
-        <div class="card listing-card">
-            <img src="<%=listing.image.url %>" class="card-img-top listing-image" alt="listing-image">
-            <div class="card-body">
-                <p class="card-text mt-3"> Created by: <i><%= listing.owner ? listing.owner.username : "System" %></i></p>
-                
-                <p class="card-body"><%=listing.description%> </p>
-                <p class="card-body">  &#8377 <%=listing.price.toLocaleString("en-IN")%></p>
-                <p class="card-body"><%=listing.country%></p>
-            </div>
-        </div>
-    </div>
-    
-    <% if (currUser && currUser._id.equals(listing.owner._id)) { %>
-        <div class="btns offset-2 d-flex justify-content-between align-items-center">
-            <div class="d-flex">
-                <a href="/listings/<%=listing._id%>/edit" class="btn show-edit-btn me-2">Edit</a>
-                <form method="POST" action="/listings/<%=listing._id%>/delete?_method=DELETE">
-                    <button class="btn btn-dark show-dlt-btn offset-2">Delete</button>
-                </form>
-            </div>
-            <a href="/listings/<%= listing._id %>/bookings/book" class="btn btn-danger book-btn">Book Now</a>
-        </div>
-    <% } %>
-
-    <br>
-
-    <div class="row offset-1 mt-3">
-        <div class="col-8">
-            <div class="card" id="weather-widget">
-                <div class="card-body text-center">
-                    <h5 class="card-title"><i class="fa-solid fa-cloud-sun"></i> Weather Information</h5>
-                    <p class="card-text">Check the current weather conditions at this destination.</p>
-                    <button class="btn btn-outline-primary" onclick="fetchWeather(<%= listing.geometry.coordinates[1] %>, <%= listing.geometry.coordinates[0] %>)">
-                        Load Weather Data
-                    </button>
+<div class="container mt-3 px-3">
+    <div class="row">
+        <div class="col-12 col-md-10 col-lg-8 mx-auto">
+            <h3 class="mb-3"><b><%=listing.title%></b></h3>
+            <div class="card listing-card border-0 shadow-sm">
+                <img src="<%=listing.image.url %>" class="card-img-top listing-image" alt="listing-image" loading="lazy">
+                <div class="card-body px-2">
+                    <p class="card-text mt-3">Created by: <i><%= listing.owner ? listing.owner.username : "System" %></i></p>
+                    <p class="card-text text-muted"><%=listing.description%></p>
+                    <p class="card-text fw-bold">&#8377; <%=listing.price.toLocaleString("en-IN")%></p>
+                    <p class="card-text"><i class="fa-solid fa-globe"></i> <%=listing.country%></p>
                 </div>
             </div>
         </div>
     </div>
+    
+   
+       <div class="row my-4">
+    <div class="col-12 col-md-10 col-lg-8 mx-auto">
+        <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
+            
+            <div class="d-flex gap-2">
+                <% if (currUser && currUser._id.equals(listing.owner._id)) { %>
+                    <a href="/listings/<%=listing._id%>/edit" class="btn btn-dark px-4 rounded-3">Edit</a>
+                    <form method="POST" action="/listings/<%=listing._id%>/delete?_method=DELETE">
+                        <button class="btn btn-outline-danger rounded-3">Delete</button>
+                    </form>
+                <% } %>
+            </div>
 
-    <div class="row offset-1 mt-3">
-        <div class="col-8">
-            <div class="card">
+            <% if (currUser && !currUser._id.equals(listing.owner._id)) { %>
+                <a href="/listings/<%= listing._id %>/bookings/book" class="btn btn-danger px-4 rounded-3">Book Now</a>
+            <% } else if (!currUser) { %>
+                <a href="/login" class="btn btn-outline-danger px-4 rounded-3">Log in to Book</a>
+            <% } %>
+
+        </div>
+    </div>
+</div>
+  
+
+    <hr class="col-12 col-md-10 col-lg-8 mx-auto">
+
+    <div class="row g-3 justify-content-center">
+        <div class="col-12 col-md-5 col-lg-4">
+            <div class="card h-100 shadow-sm border-0" id="weather-widget">
+                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                    <h5 class="card-title text-primary"><i class="fa-solid fa-cloud-sun"></i> Weather</h5>
+                    <p class="card-text text-muted small">Check current atmospheric configurations.</p>
+                    <button class="btn btn-sm btn-outline-primary rounded-5" onclick="fetchWeather(<%= listing.geometry.coordinates[1] %>, <%= listing.geometry.coordinates[0] %>)">
+                        Load Data
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-5 col-lg-4">
+            <div class="card h-100 shadow-sm border-0">
                 <div class="card-body">
-                    <h5 class="card-title"><i class="fa-solid fa-leaf"></i> Smart Carbon Footprint Calculator</h5>
+                    <h5 class="card-title text-success"><i class="fa-solid fa-leaf"></i> Carbon Calculator</h5>
                     <form id="footprint-form" onsubmit="event.preventDefault(); calculateFootprint();">
-                        <div class="mb-3">
-                            <label for="transport" class="form-label">Select Transport Mode:</label>
-                            <select class="form-select" id="transport" name="transport">
+                        <div class="mb-2">
+                            <select class="form-select form-select-sm" id="transport" name="transport">
                                 <option value="flight">Flight (0.25 kg CO₂/km)</option>
                                 <option value="car">Car (0.15 kg CO₂/km)</option>
                                 <option value="train">Train (0.05 kg CO₂/km)</option>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-success">Calculate</button>
+                        <button type="submit" class="btn btn-sm btn-success w-100 rounded-5">Calculate</button>
                     </form>
-                    <p id="footprint-result" class="mt-3"></p>
+                    <p id="footprint-result" class="mt-2 small text-center fw-bold text-muted"></p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row offset-1">
-        <hr>
-        <% if (currUser) { %>
-        <h4>Leave a review</h4>
-        <div class="col-8">
+    <hr class="col-12 col-md-10 col-lg-8 mx-auto my-4">
+
+    <div class="row">
+        <div class="col-12 col-md-10 col-lg-8 mx-auto">
+            <% if (currUser) { %>
+            <h4 class="mb-3">Leave a review</h4>
             <form method="post" action="/listings/<%=listing._id%>/reviews" novalidate class="needs-validation">
                 <div class="mb-3">
-                    <label for="rating" class="form-label">Rating</label>
                     <fieldset class="starability-slot">
-                        <legend>First rating:</legend>
                         <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
                         <input type="radio" id="second-rate1" name="review[rating]" value="1" />
                         <label for="second-rate1" title="Terrible">1 star</label>
@@ -95,30 +127,26 @@
                 </div>
                 <div class="mb-3">
                     <label for="comments" class="form-label">Comments</label>
-                    <textarea name="review[comment]" id="comments" cols="30" rows="5" class="form-control" required></textarea>
-                    <div class="invalid-feedback">
-                        Add comments 
-                    </div>
+                    <textarea name="review[comment]" id="comments" cols="30" rows="4" class="form-control" required></textarea>
+                    <div class="invalid-feedback">Add comments</div>
                 </div>
-                <button class="btn btn-outline-dark mb-3">Submit</button>
+                <button class="btn btn-outline-dark mb-4 px-4 rounded-3">Submit</button>
             </form>
-        </div>
-        <% } %>
+            <% } %>
 
-        <div>
-            <h4>All Reviews</h4>
-            <div class="row">
+            <h4 class="mt-2">All Reviews</h4>
+            <div class="row g-3">
                 <% for(let review of listing.reviews) { %>
-                <div class="card mb-3 col-5 ms-3">
-                    <div class="card-body">
-                        <div class="card-title">@<%=review.author.username %></div>
-                        <div class="card-text">
+                <div class="col-12 col-sm-6">
+                    <div class="card h-100 shadow-sm border-0 p-2">
+                        <div class="card-body">
+                            <h6 class="card-title fw-bold">@<%=review.author.username %></h6>
                             <p class="starability-result" data-rating=<%=review.rating %>></p>
-                            <p><%= review.comment %></p>
+                            <p class="card-text small text-muted"><%= review.comment %></p>
+                            <form method="Post" action="/listings/<%=listing._id%>/reviews/<%=review._id%>?_method=DELETE" class="mt-2">
+                                <button class="btn btn-sm btn-link text-danger p-0 border-0 text-decoration-none">Delete</button>
+                            </form>
                         </div>
-                        <form method="Post" action="/listings/<%=listing._id%>/reviews/<%=review._id%>?_method=DELETE">
-                            <button class="btn btn-sm btn-dark mb-3">Delete</button>
-                        </form>
                     </div>
                 </div>
                 <% } %>
@@ -126,29 +154,31 @@
         </div>
     </div>
 
-    <div class="col-8 offset-3 mb-3">
-        <h3>Where you’ll be</h3>
-        <div id="map" style="height: 400px; width: 100%;"></div>
-        <button class="btn btn-primary mt-3 mb-3" onclick="loadLiveRoute()">See Route</button>
-    </div>
+    <hr class="col-12 col-md-10 col-lg-8 mx-auto my-4">
 
-    <script>
-    // 1. Initialize Variables from Controller [cite: 23, 27, 37]
+    <div class="row mb-5">
+        <div class="col-12 col-md-10 col-lg-8 mx-auto">
+            <h3>Where you’ll be</h3>
+            <div id="map"></div>
+            <button class="btn btn-primary w-100 mt-3 rounded-5 py-2" onclick="loadLiveRoute()"><i class="fa-solid fa-location-crosshairs"></i> See Route</button>
+        </div>
+    </div>
+</div>
+
+<script>
     const mapToken = "<%- mapToken %>";
     const weatherKey = "<%- weatherApiKey %>"; 
     const coordinates = <%- JSON.stringify(listing.geometry.coordinates) %>;
     
     mapboxgl.accessToken = mapToken;
 
-    // 2. Initialize the Map [cite: 24]
     const map = new mapboxgl.Map({
-        container: 'map', 
+        container: 'map',
         style: 'mapbox://styles/mapbox/streets-v12', 
         center: coordinates,
         zoom: 9
     });
 
-    // 3. Add Static Destination Marker [cite: 25]
     new mapboxgl.Marker({ color: "red" })
         .setLngLat(coordinates)
         .setPopup(
@@ -157,41 +187,35 @@
         )
         .addTo(map);
 
-    // 4. Live Tracking & Route Function [cite: 28, 31, 32]
-   // 4. Live Tracking & Route Function
     let directionsLoaded = false;
     let watchId = null;
-    let directions = null; // Move directions to global script scope so we can update it
+    let directions = null; 
 
     function loadLiveRoute() {
         if (!mapToken || mapToken === "" || mapToken === "undefined") {
-            console.error("Mapbox Token is missing!");
             return alert("Error: Mapbox token not configured correctly.");
         }
         
         mapboxgl.accessToken = mapToken;
-        
         if (directionsLoaded) return;
         const btn = document.querySelector("button[onclick='loadLiveRoute()']");
         if (btn) btn.innerText = "Tracking your movement...";
 
-        // 1. Get the transport mode selected by the user in the dropdown menu
         const transportMode = document.getElementById("transport").value;
-        
-        // 2. Map your form values to valid Mapbox routing profiles
-        let mapboxProfile = 'mapbox/driving-traffic'; // Default fallback
+        let mapboxProfile = 'mapbox/driving-traffic';
         if (transportMode === 'train') {
-            mapboxProfile = 'mapbox/walking'; // Mapbox doesn't have trains, walking/cycling acts as an alternative, or stick to driving
+            mapboxProfile = 'mapbox/walking';
         }
 
-        // 3. Initialize MapboxDirections with the dynamic profile
         directions = new MapboxDirections({
-            accessToken: mapboxgl.accessToken,
-            unit: 'metric',
-            profile: mapboxProfile, // Set the selected transport profile dynamically
-            controls: { inputs: true, instructions: true }
-        });
-        
+    accessToken: mapboxgl.accessToken,
+    unit: 'metric',
+    profile: mapboxProfile, 
+    controls: { 
+        inputs: true, 
+        instructions: true // This brings back the live duration/time display
+    }
+});
         map.addControl(directions, 'top-left');
         directions.setDestination(coordinates);
 
@@ -199,7 +223,6 @@
             watchId = navigator.geolocation.watchPosition(
                 position => {
                     const userLoc = [position.coords.longitude, position.coords.latitude];
-                    
                     directions.setOrigin(userLoc);
                     
                     map.flyTo({
@@ -221,10 +244,9 @@
             alert("Your browser doesn't support live tracking.");
         }
     }
-    // 5. Weather Functionality Fix [cite: 37, 38]
+
     async function fetchWeather(lat, lon) {
         if (!weatherKey) return console.error("Weather API key missing");
-        
         try {
             const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${weatherKey}`);
             const data = await response.json();
@@ -232,31 +254,28 @@
             if (response.ok) {
                 document.getElementById("weather-widget").innerHTML = `
                     <div class="card-body">
-                        <h5 class="card-title">Weather at Destination</h5>
-                        <p><strong>${data.name}</strong>: ${data.main.temp}°C</p>
-                        <p>Condition: ${data.weather[0].description}</p>
+                        <h5 class="card-title text-primary"><i class="fa-solid fa-cloud-sun"></i> Weather at Destination</h5>
+                        <p class="m-0"><strong>${data.name}</strong></p>
+                        <h3 class="fw-bold text-dark my-1">${data.main.temp}°C</h3>
+                        <p class="card-text text-capitalize text-muted small">${data.weather[0].description}</p>
                     </div>`;
             }
         } catch (err) { console.error("Weather failed", err); }
     }
-// 6. Carbon Footprint & Dynamic Map Update
+
     function calculateFootprint() {
         const transport = document.getElementById("transport").value;
         const dist = 500; 
         const factors = { flight: 0.25, car: 0.15, train: 0.05 };
         const result = (dist * factors[transport]).toFixed(2);
         document.getElementById("footprint-result").innerHTML = 
-            `Estimated emissions for a ${dist} km trip: <b>${result} kg CO₂</b>.`;
-
-        // If the route plugin is already initialized, update its driving profile dynamically!
+            `Trip emissions: <b>${result} kg CO₂</b>`;
         if (directions) {
             if (transport === 'car') {
                 directions.setProfile('mapbox/driving-traffic');
             } else if (transport === 'train') {
-                // Changing profile recalculates distances and ETA times on the map panel
-                directions.setProfile('mapbox/cycling'); 
+                directions.setProfile('mapbox/cycling');
             }
         }
     }
-   </script>
-</body>
+</script>
