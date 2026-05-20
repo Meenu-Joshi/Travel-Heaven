@@ -7,18 +7,29 @@ module.exports.renderSignupForm=(req,res)=>{
 // controllers/user.js
 module.exports.signup = async (req, res, next) => {
     try {
-        let { username, email, password, phone } = req.body;
-        // 1. Create user with phone number
-        const newUser = new User({ email, username, phone }); 
+        const { username, email, password, phone } = req.body;
+
+        // 1. Strict Server-side Validation Guardrail
+        if (!password || password.length < 6) {
+            req.flash("error", "Registration failed: Password must be at least 6 characters long.");
+            return res.redirect("/signup");
+        }
+
+        // 2. Proceed with user registration if validation passes
+        const newUser = new User({ email, username, phone });
+        
+        // Assuming passport-local-mongoose is used for user registration:
         const registeredUser = await User.register(newUser, password);
         
+        // Automatically log in the user after registering successfully
         req.login(registeredUser, (err) => {
-            if (err) return next(err);
-            
-            // 2. Instead of going to /listings, go to the verification trigger
-            // This will automatically call your sendOTP logic
-            res.redirect("/verify/email"); 
+            if (err) {
+                return next(err);
+            }
+            req.flash("success", "Welcome to Wanderlust!");
+            res.redirect("/listings"); 
         });
+
     } catch (e) {
         req.flash("error", e.message);
         res.redirect("/signup");

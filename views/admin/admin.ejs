@@ -1,4 +1,19 @@
 <% layout('layout/boilerplate') -%>
+
+<% if(successMsg && successMsg.length) { %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <%= successMsg %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<% } %>
+
+<% if(errorMsg && errorMsg.length) { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <%= errorMsg %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<% } %>
+
 <div class="container mt-4">
     <h2 class="mb-4">ExploreVista Admin Panel</h2>
 
@@ -24,69 +39,71 @@
                         <th>Action</th>
                     </tr>
                 </thead>
-              <tbody>
-    <% for(let list of listings) { %>
-    <tr>
-        <td><%= list.title %></td>
-        <td><%= list.owner ? list.owner.username : "System" %></td>
-        <td>
-            <div class="d-flex">
-                <a href="/listings/<%= list._id %>/edit" class="btn btn-sm btn-info me-2">Edit</a>
-                
-                <form method="POST" action="/listings/<%=list._id%>?_method=DELETE">
-                    <button class="btn btn-sm btn-danger">Delete</button>
-                </form>
-            </div>
-        </td>
-    </tr>
-    <% } %>
-</tbody>
+                <tbody>
+                    <% for(let list of listings) { %>
+                    <tr>
+                        <td><%= list.title %></td>
+                        <td><%= list.owner ? list.owner.username : "System" %></td>
+                        <td>
+                            <div class="d-flex">
+                                <a href="/listings/<%= list._id %>/edit" class="btn btn-sm btn-info me-2">Edit</a>
+                                <form method="POST" action="/listings/<%= list._id %>?_method=DELETE" onsubmit="return confirm('Are you sure you want to delete this listing?')">
+    <button type="submit" class="btn btn-sm btn-danger">
+        Delete
+    </button>
+</form>
+                            </div>
+                        </td>
+                    </tr>
+                    <% } %>
+                </tbody>
             </table>
         </div>
 
-       <div class="tab-pane fade" id="users">
-    <table class="table table-hover">
-        <thead class="table-dark">
-            <tr>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Status</th>
-                <th>Actions</th> </tr>
-        </thead>
-        <tbody>
-            <% for(let u of users) { %>
-            <tr>
-                <td><%= u.username %></td>
-                <td><%= u.email %></td>
-                <td>
-                    <% if(u.isAdmin) { %>
-                        <span class="badge bg-danger">Admin</span>
-                    <% } else { %>
-                        <span class="badge bg-secondary">User</span>
-                    <% } %>
-                </td>
-                <td>
-                    <div class="d-flex">
-                        <form method="POST" action="/admin/users/<%= u._id %>/toggle-role?_method=PUT" class="me-2">
-                            <button class="btn btn-sm btn-warning">
-                                <%= u.isAdmin ? "Demote" : "Make Admin" %>
-                            </button>
-                        </form>
+        <div class="tab-pane fade" id="users">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(let u of users) { %>
+                    <tr>
+                        <td><%= u.username %></td>
+                        <td><%= u.email %></td>
+                        <td>
+                            <% if(u.isAdmin) { %>
+                                <span class="badge bg-danger">Admin</span>
+                            <% } else { %>
+                                <span class="badge bg-secondary">User</span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <div class="d-flex">
+                                <form method="POST" action="/admin/users/<%= u._id %>/toggle-role?_method=PUT" class="me-2">
+                                    <button type="submit" class="btn btn-sm btn-warning">
+                                        <%= u.isAdmin ? "Demote" : "Make Admin" %>
+                                    </button>
+                                </form>
 
-                        <% if(currUser && currUser._id.toString() !== u._id.toString()) { %>
-                            <form method="POST" action="/admin/users/<%= u._id %>?_method=DELETE">
-                                <button class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this user?')">Delete</button>
-                            </form>
-                        <% } else { %>
-                            <span class="text-muted small (You)"></span>
-                        <% } %>
-                    </div>
-                </td>
-            </tr>
-            <% } %>
-        </tbody>
-    </table>
-</div>
+                                <% if(currUser && currUser._id.toString() !== u._id.toString()) { %>
+                                    <form method="POST" action="/admin/users/<%= u._id %>?_method=DELETE">
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this user?')">Delete</button>
+                                    </form>
+                                <% } else { %>
+                                    <span class="text-muted small align-self-center">(You)</span>
+                                <% } %>
+                            </div>
+                        </td>
+                    </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
 
         <div class="tab-pane fade" id="bookings">
             <table class="table table-hover">
@@ -104,14 +121,14 @@
                         <td><%= b._id %></td>
                         <td><%= b.guest ? b.guest.username : "Guest" %></td>
                         <td>
-                            <% if(b.paymentStatus === "Completed") { %>
+                            <% if(b.status === "Confirmed") { %>
                                 <span class="badge bg-success">Paid</span>
                             <% } else { %>
                                 <span class="badge bg-warning text-dark">Pending</span>
                             <% } %>
                         </td>
-                        <td><code><%= b.transactionId || "N/A" %></code></td>
-                    </tr>
+                        <td><code><%= b.transactionId || b.razorpay_order_id || "N/A" %></code></td>
+                    </tr> 
                     <% } %>
                 </tbody>
             </table>

@@ -2,32 +2,36 @@
 <h2 class="offset-3 mt-3">Signup</h2>
 <div class="row mt-3 offset-3">
     <form action="/signup" method="POST" novalidate class="needs-validation">
-    <div class="col mb-3 col-6">
-        <div class="mb-3">
-            <label  for="username" class="form-label">Username</label>
-            <input type="text" class="form-control" name="username" id="username" placeholder="Enter your name.." required/>
-            <div class="valid-feedback">
-                Looks good!
-              </div>
-        </div>
-              <div class="mb-3">
-                <label  for="email" class="form-label">Email</label>
+        <div class="col mb-3 col-6">
+            
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" name="username" id="username" placeholder="Enter your name.." required/>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
                 <input type="email" class="form-control" name="email" id="email" placeholder="Enter your email address.." required/>
-                
+            </div>
+            
+            <div class="mb-3">
+                <label for="phone" class="form-label">Phone Number</label>
+                <input type="text" class="form-control" name="phone" id="phone" placeholder="+91..." required/>
+            </div>
+            
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" name="password" id="password" placeholder="Password" minlength="6" required/>
+                <div class="invalid-feedback">
+                    Password must be at least 6 characters long.
+                </div>
+            </div>
+
         </div>
-        <div class="mb-3">
-    <label for="phone" class="form-label">Phone Number</label>
-    <input type="text" class="form-control" name="phone" id="phone" placeholder="+91..." required/>
-</div>
-        <div class="mb-3">
-            <label  for="password" class="form-label">Password</label>
-            <input type="password" class="form-control" name="password" id="password" placeholder="Password" minlength="6" required/>
-         </div>
-         <div class="invalid-feedback">
-        Password must be at least 6 characters long.
-    </div>
-    </div>
-    <button class="btn btn-success">Signup</button> <br><br>
-    <a href="/login">Already have an account? Login</a>
-</form>
+        <button class="btn btn-success">Signup</button> <br><br>
+        <a href="/login">Already have an account? Login</a>
+    </form>
 </div>

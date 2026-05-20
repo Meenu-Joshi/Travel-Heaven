@@ -8,7 +8,20 @@ const bookingSchema = new Schema({
     totalPrice: Number,
     listing: { type: Schema.Types.ObjectId, ref: "Listing" },
     guest: { type: Schema.Types.ObjectId, ref: "User" },
-    status: { type: String, enum: ["Pending", "Confirmed"], default: "Pending" }
-});
+    
+    // UPDATED: Added "Completed" to the enum options
+    status: { 
+        type: String, 
+        enum: ["Pending", "Confirmed", "Completed"], 
+        default: "Pending" 
+    },
+    
+    // NEW: Field to capture the payment gateway's unique transaction hash
+    transactionId: { 
+        type: String, 
+        default: "N/A" 
+    },
+    razorpay_order_id: { type: String, required: true }
+}, { timestamps: true }); // Adds createdAt and updatedAt automatically
 
 module.exports = mongoose.model("Booking", bookingSchema);

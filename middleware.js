@@ -55,12 +55,26 @@ module.exports.isOwner = async (req, res, next) => {
     let { id } = req.params;
     let listing = await Listing.findById(id);
     
-    // ALLOW access if the user is the owner OR if the user is an admin
-    if (!res.locals.currUser.isAdmin && !listing.owner._id.equals(res.locals.currUser._id)) {
-        req.flash("error", "you didn't have access.");
-        return res.redirect(`/listings/${id}`);
+    if (!listing) {
+        // If it's a fetch API request, send JSON instead of a flash redirect
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.status(404).json({ success: false, message: "Listing not found" });
+        }
+        req.flash("error", "Listing you are trying to access does not exist!");
+        return res.redirect("/listings");
     }
-    next();
+
+    // FIX: Grant access if the current user is the owner OR an admin
+    if (res.locals.currUser && (listing.owner.equals(res.locals.currUser._id) || res.locals.currUser.isAdmin)) {
+        return next(); // Authorization successful, proceed to destroyListing controller!
+    }
+
+    // If neither condition is met, block them
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        return res.status(403).json({ success: false, message: "You do not have permission to do that." });
+    }
+    req.flash("error", "You do not have permission to perform this action!");
+    return res.redirect(`/listings/${id}`);
 };
 module.exports.isAuthor = async (req, res, next) => {
     let { id, reviewId } = req.params;

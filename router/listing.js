@@ -38,6 +38,5 @@ router.route("/:id")
     .put(isLoggedIn, isOwner, upload.single('listing[image]'), validateListing, WrapAsync(listingController.editListing));
 
 router.get("/:id/edit", isLoggedIn, isOwner, WrapAsync(listingController.renderEditForm));
-router.delete("/:id/delete", isOwner, isLoggedIn, WrapAsync(listingController.destroyListing));
-
+router.delete("/:id", isLoggedIn, WrapAsync(listingController.destroyListing));
 module.exports = router;

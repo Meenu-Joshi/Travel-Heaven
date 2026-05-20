@@ -1,41 +1,46 @@
 <% layout('layout/boilerplate') -%>
-<div class="row mt-3 mb-5">
-    <div class="col-md-6 offset-md-3">
-        <div class="card shadow">
-            <div class="card-header bg-dark text-white text-center">
-                <h4>Booking Summary</h4>
-            </div>
-            <div class="card-body p-4">
-                <h5><%= listing.title %></h5>
-                <p class="text-muted"><%= checkIn %> to <%= checkOut %></p>
-                <p class="text-muted">Guests: <%= guests %></p>
-                <hr>
-                <div class="d-flex justify-content-between mb-4">
-                    <strong>Total Amount:</strong>
-                    <span class="text-success fw-bold">&#8377; <%= totalPrice.toLocaleString("en-IN") %></span>
+<div class="container mt-5 px-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-header bg-danger text-white py-3 px-4">
+                    <h3 class="mb-0 fw-bold"><i class="fa-solid fa-file-invoice me-2"></i> Reservation Review Summary</h3>
                 </div>
+                <div class="card-body p-4 bg-light-subtle">
+                    <h4 class="text-secondary mb-3"><%= listing.title %></h4>
+                    <p class="text-muted mb-4"><i class="fa-solid fa-location-dot text-danger"></i> <%= listing.location %>, <%= listing.country %></p>
+                    
+                    <hr class="opacity-10 mb-4">
+                    
+                    <div class="row g-3 text-start">
+                        <div class="col-6 col-md-4">
+                            <small class="text-muted d-block text-uppercase letter-spacing-1">Check-In</small>
+                            <strong class="fs-5 text-dark"><%= new Date(checkIn).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></strong>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <small class="text-muted d-block text-uppercase letter-spacing-1">Check-Out</small>
+                            <strong class="fs-5 text-dark"><%= new Date(checkOut).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></strong>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <small class="text-muted d-block text-uppercase letter-spacing-1">Occupancy Load</small>
+                            <strong class="fs-5 text-dark"><%= guests %> Registered Guest(s)</strong>
+                        </div>
+                    </div>
 
-                <h6 class="mb-3">Select Payment Method:</h6>
-                
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="paymentMethod" id="payOnline" value="online" checked>
-                    <label class="form-check-label" for="payOnline">Pay Online (Razorpay/UPI/Cards)</label>
-                </div>
-                <div class="form-check mb-4">
-                    <input class="form-check-input" type="radio" name="paymentMethod" id="payOffline" value="cod">
-                    <label class="form-check-label" for="payOffline">Pay at Property (COD)</label>
-                </div>
+                    <div class="bg-danger-subtle p-3 rounded-3 mt-4 d-flex justify-content-between align-items-center border border-danger-subtle">
+                        <span class="fs-5 fw-bold text-danger-emphasis">Total Gross Valuation:</span>
+                        <span class="fs-3 fw-black text-danger">₹<%= totalPrice.toLocaleString('en-IN') %></span>
+                    </div>
 
-                <div id="online-pay-div">
-                    <button id="rzp-button" class="btn btn-danger w-100 py-2">Pay Online Now</button>
+                    <div class="mt-4 d-grid gap-2">
+                        <button id="pay-btn" class="btn btn-danger btn-lg rounded-5 py-2 fw-bold shadow-sm">
+                            <i class="fa-solid fa-credit-card me-2"></i> Proceed to Secure Payment Gateway
+                        </button>
+                        <a href="/listings/<%= listing._id %>" class="btn btn-link text-muted text-decoration-none text-center small mt-2">
+                            <i class="fa-solid fa-arrow-left-long"></i> Revoke Transaction & Exit
+                        </a>
+                    </div>
                 </div>
-
-                <form action="/listings/<%= listing._id %>/bookings/book-cod" method="POST" id="cod-form" style="display: none;">
-                    <input type="hidden" name="booking[checkIn]" value="<%= checkIn %>">
-                    <input type="hidden" name="booking[checkOut]" value="<%= checkOut %>">
-                    <input type="hidden" name="booking[guests]" value="<%= guests %>">
-                    <button class="btn btn-dark w-100 py-2">Confirm Booking (Pay Later)</button>
-                </form>
             </div>
         </div>
     </div>
@@ -43,39 +48,26 @@
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
-    // 1. SELECT ELEMENTS
-    const onlineRadio = document.getElementById('payOnline');
-    const offlineRadio = document.getElementById('payOffline');
-    const onlineDiv = document.getElementById('online-pay-div');
-    const codForm = document.getElementById('cod-form');
-
-    // 2. TOGGLE LOGIC
-    offlineRadio.addEventListener('change', () => {
-        if (offlineRadio.checked) {
-            onlineDiv.style.display = 'none';
-            codForm.style.display = 'block';
-        }
-    });
-
-    onlineRadio.addEventListener('change', () => {
-        if (onlineRadio.checked) {
-            onlineDiv.style.display = 'block';
-            codForm.style.display = 'none';
-        }
-    });
-
-    // 3. RAZORPAY CONFIGURATION
-    const options = {
-        "key": "<%= razorpay_key %>",
-        "amount": "<%= order.amount %>",
-        "currency": "INR",
-        "name": "Travel Heaven",
+document.getElementById('pay-btn').onclick = function(e){
+    e.preventDefault();
+    
+    // Absolute dynamic configuration options map block
+    var options = {
+        "key": "<%= razorpay_key %>", 
+        "amount": "<%= order.amount %>", 
+        "currency": "<%= order.currency %>",
+        "name": "WanderLust Marketplace",
+        "description": "Secure Stay Reservation Token Assignment",
         "order_id": "<%= order.id %>",
+        
         "handler": async function (response) {
             try {
-                const res = await fetch("/listings/<%= listing._id %>/bookings/verify-payment", {
+                // EXPLICIT ABSOLUTE PATH ALIGNMENT FIX APPLIED HERE
+                const verifyRes = await fetch("/listings/<%= listing._id %>/bookings/verify-payment", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: { 
+                        "Content-Type": "application/json" 
+                    },
                     body: JSON.stringify({
                         razorpay_order_id: response.razorpay_order_id,
                         razorpay_payment_id: response.razorpay_payment_id,
@@ -84,27 +76,33 @@
                     })
                 });
 
-                const data = await res.json();
+                const data = await verifyRes.json();
+                
                 if (data.status === "success") {
-                    window.location.href = data.redirectUrl; 
+                    // Force absolute browser location forwarding upon valid server validation approvals
+                    window.location.href = data.redirectUrl;
                 } else {
-                    alert("Verification Failed: " + data.message);
+                    alert("Payment Validation Rejected: " + data.message);
                 }
             } catch (err) {
-                console.error("Verification Error:", err);
-                alert("Something went wrong during payment verification.");
+                console.error("Asynchronous checkout processing failure:", err);
+                alert("Critical network handshake connection timeout error.");
             }
         },
         "prefill": {
-            "name": "<%= currUser ? currUser.username : '' %>",
-            "email": "<%= (currUser && currUser.email) ? currUser.email : '' %>"
+            "name": "Meenu Joshi"
         },
-        "theme": { "color": "#fe424d" }
+        "theme": { 
+            "color": "#fe424d" 
+        }
     };
-
-    const rzp = new Razorpay(options);
-    document.getElementById('rzp-button').onclick = (e) => { 
-        rzp.open(); 
-        e.preventDefault();
-    };
+    
+    var rzp1 = new Razorpay(options);
+    
+    rzp1.on('payment.failed', function (response){
+        alert("Transaction Aborted! Reason: " + response.error.description);
+    });
+    
+    rzp1.open();
+}
 </script>
